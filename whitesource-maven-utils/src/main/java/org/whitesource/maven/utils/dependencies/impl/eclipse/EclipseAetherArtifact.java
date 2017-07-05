@@ -11,6 +11,7 @@ import java.io.File;
 public class EclipseAetherArtifact implements AetherArtifact {
 
     private Artifact delegate;
+
     EclipseAetherArtifact(Artifact artifact) {
         this.delegate = artifact;
     }
@@ -33,6 +34,11 @@ public class EclipseAetherArtifact implements AetherArtifact {
     @Override
     public String getClassifier() {
         return delegate.getClassifier();
+    }
+
+    @Override
+    public String getExtension() {
+        return delegate.getExtension();
     }
 
     @Override

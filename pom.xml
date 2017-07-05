@@ -46,11 +46,6 @@
     </organization>
     <developers>
         <developer>
-            <id>itai.marko</id>
-            <name>Itai Marko</name>
-            <email>itai.marko@whitesourcesoftware.com</email>
-        </developer>
-        <developer>
             <id>tom.shapira</id>
             <name>Tom Shapira</name>
             <email>tom.shapira@whitesourcesoftware.com</email>
@@ -67,7 +62,7 @@
     </prerequisites>
 
     <properties>
-        <api.version>2.3.1</api.version>
+        <api.version>2.3.7</api.version>
         <maven.version>3.0</maven.version>
         <!--<maven.version>3.1.1</maven.version>-->
     </properties>

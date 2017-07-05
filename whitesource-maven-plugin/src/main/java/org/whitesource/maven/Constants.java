@@ -25,7 +25,8 @@ public final class Constants {
 	/* --- Configuration --- */
 
 	public static final String AGENT_TYPE = "maven-plugin";
-	public static final String AGENT_VERSION = "2.3.1";
+	public static final String AGENT_VERSION = "2.3.7";
+	public static final String PLUGIN_VERSION = "3.2.7";
 
 	public static final String PLUGIN_PREFIX = "org.whitesource.";
 	public static final String ORG_TOKEN = PLUGIN_PREFIX + "orgToken";

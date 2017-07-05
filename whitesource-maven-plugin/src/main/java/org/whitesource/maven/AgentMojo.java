@@ -1,19 +1,13 @@
 package org.whitesource.maven;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.maven.artifact.Artifact;
-import org.apache.maven.model.Dependency;
-import org.apache.maven.model.Exclusion;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.DependencyResolutionException;
 import org.apache.maven.project.MavenProject;
 import org.whitesource.agent.api.ChecksumUtils;
 import org.whitesource.agent.api.dispatch.BaseCheckPoliciesResult;
-import org.whitesource.agent.api.model.AgentProjectInfo;
-import org.whitesource.agent.api.model.Coordinates;
-import org.whitesource.agent.api.model.DependencyInfo;
-import org.whitesource.agent.api.model.ExclusionInfo;
+import org.whitesource.agent.api.model.*;
 import org.whitesource.agent.report.PolicyCheckReport;
 import org.whitesource.maven.utils.dependencies.*;
 
@@ -31,10 +25,10 @@ public abstract class AgentMojo extends WhitesourceMojo {
 
     /* --- Static members --- */
 
-    public static final String POM = "pom";
-    public static final String TYPE = "type";
-    public static final String SCOPE_TEST = "test";
-    public static final String SCOPE_PROVIDED = "provided";
+    private static final String POM = "pom";
+    private static final String SCOPE_TEST = "test";
+    private static final String SCOPE_PROVIDED = "provided";
+    private static final String FILENAME_PATTERN = "{0}-{1}.{2}";
 
     /* --- Members --- */
 
@@ -189,28 +183,6 @@ public abstract class AgentMojo extends WhitesourceMojo {
         orgToken = session.getSystemProperties().getProperty(Constants.ORG_TOKEN, orgToken);
     }
 
-    protected DependencyInfo getDependencyInfo(Dependency dependency) {
-        DependencyInfo info = new DependencyInfo();
-
-        // dependency data
-        info.setGroupId(dependency.getGroupId());
-        info.setArtifactId(dependency.getArtifactId());
-        info.setVersion(dependency.getVersion());
-        info.setScope(dependency.getScope());
-        info.setClassifier(dependency.getClassifier());
-        info.setOptional(dependency.isOptional());
-        info.setType(dependency.getType());
-        info.setSystemPath(dependency.getSystemPath());
-
-        // exclusions
-        Collection<ExclusionInfo> exclusions = info.getExclusions();
-        for (Exclusion exclusion : dependency.getExclusions()) {
-            exclusions.add(new ExclusionInfo(exclusion.getArtifactId(), exclusion.getGroupId()));
-        }
-
-        return info;
-    }
-
     private DependencyInfo getDependencyInfo(AetherDependencyNode dependencyNode) {
         DependencyInfo info = new DependencyInfo();
 
@@ -223,17 +195,27 @@ public abstract class AgentMojo extends WhitesourceMojo {
         info.setScope(dependency.getScope());
         info.setClassifier(artifact.getClassifier());
         info.setOptional(dependency.isOptional());
-        info.setType(artifact.getProperty(TYPE, ""));
+        info.setType(artifact.getExtension());
+        info.setDependencyType(DependencyType.MAVEN);
 
         // try to calculate SHA-1
         File artifactFile = artifact.getFile();
         if (artifactFile != null && artifactFile.exists()) {
             try {
-                info.setSystemPath(artifactFile.getAbsolutePath());
                 info.setSha1(ChecksumUtils.calculateSHA1(artifactFile));
+
+                info.setSystemPath(artifactFile.getAbsolutePath());
+                String filename = artifactFile.getName();
+                if (StringUtils.isNotBlank(filename)) {
+                    info.setFilename(filename);
+                } else if (StringUtils.isNotBlank(artifact.getExtension())) {
+                    info.setFilename(getFilename(artifact));
+                }
             } catch (IOException e) {
                 debug(Constants.ERROR_SHA1 + " for " + dependency.toString());
             }
+        } else if (StringUtils.isNotBlank(artifact.getExtension())) {
+            info.setFilename(getFilename(artifact));
         }
 
         // exclusions
@@ -300,35 +282,6 @@ public abstract class AgentMojo extends WhitesourceMojo {
         return projectInfo;
     }
 
-    protected Collection<DependencyInfo> collectDirectDependencies(MavenProject project) {
-        Collection<DependencyInfo> dependencyInfos = new ArrayList<DependencyInfo>();
-
-        Map<Dependency, Artifact> lut = createLookupTable(project);
-        for (Dependency dependency : project.getDependencies()) {
-            if (ignoreTestScopeDependencies && Artifact.SCOPE_TEST.equals(dependency.getScope())) {
-                continue; // exclude test scope dependencies from being sent to the server
-            }
-
-            DependencyInfo dependencyInfo = getDependencyInfo(dependency);
-
-            // try to calculate SHA-1
-            Artifact artifact = lut.get(dependency);
-            if (artifact != null) {
-                File artifactFile = artifact.getFile();
-                if (artifactFile != null && artifactFile.exists()) {
-                    try {
-                        dependencyInfo.setSha1(ChecksumUtils.calculateSHA1(artifactFile));
-                    } catch (IOException e) {
-                        debug(Constants.ERROR_SHA1 + " for " + artifact.getId());
-                    }
-                }
-            }
-            dependencyInfos.add(dependencyInfo);
-        }
-
-        return dependencyInfos;
-    }
-
     /**
      * Build the dependency graph of the project in order to resolve all transitive dependencies.
      * By default resolves filters scopes test and provided, and transitive optional dependencies.
@@ -372,20 +325,6 @@ public abstract class AgentMojo extends WhitesourceMojo {
                 mavenProject.getVersion());
     }
 
-    protected Map<Dependency, Artifact> createLookupTable(MavenProject project) {
-        Map<Dependency, Artifact> lut = new HashMap<Dependency, Artifact>();
-
-        for (Dependency dependency : project.getDependencies()) {
-            for (Artifact dependencyArtifact : project.getDependencyArtifacts()) {
-                if (match(dependency, dependencyArtifact)) {
-                    lut.put(dependency, dependencyArtifact);
-                }
-            }
-        }
-
-        return lut;
-    }
-
     protected boolean matchAny(String value, String[] patterns) {
         if (value == null) { return false; }
 
@@ -397,32 +336,6 @@ public abstract class AgentMojo extends WhitesourceMojo {
                 match = value.matches(regex);
             }
         }
-        return match;
-    }
-
-    protected boolean match(Dependency dependency, Artifact artifact) {
-        boolean match = dependency.getGroupId().equals(artifact.getGroupId()) &&
-                dependency.getArtifactId().equals(artifact.getArtifactId()) &&
-                dependency.getVersion().equals(artifact.getVersion());
-
-        if (match) {
-            String artifactClassifier = artifact.getClassifier();
-            if (dependency.getClassifier() == null) {
-                match = artifactClassifier == null || StringUtils.isBlank(artifactClassifier);
-            } else {
-                match = dependency.getClassifier().equals(artifactClassifier);
-            }
-        }
-
-        if (match) {
-            String type = artifact.getType();
-            if (dependency.getType() == null) {
-                match = type == null || "jar".equals(type);
-            } else {
-                match = dependency.getType().equals(type);
-            }
-        }
-
         return match;
     }
 
@@ -522,6 +435,10 @@ public abstract class AgentMojo extends WhitesourceMojo {
             }
         }
         return ignore;
+    }
+
+    private String getFilename(AetherArtifact artifact) {
+        return MessageFormat.format(FILENAME_PATTERN, artifact.getArtifactId(), artifact.getVersion(), artifact.getExtension());
     }
 
 }

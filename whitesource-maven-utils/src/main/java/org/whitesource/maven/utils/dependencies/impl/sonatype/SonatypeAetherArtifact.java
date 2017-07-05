@@ -37,6 +37,11 @@ class SonatypeAetherArtifact implements AetherArtifact {
     }
 
     @Override
+    public String getExtension() {
+        return delegate.getExtension();
+    }
+
+    @Override
     public String getProperty(String type, String s) {
         return delegate.getProperty(type, s);
     }

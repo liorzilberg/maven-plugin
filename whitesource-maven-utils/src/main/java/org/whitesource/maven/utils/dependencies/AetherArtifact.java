@@ -15,6 +15,8 @@ public interface AetherArtifact {
 
     String getClassifier();
 
+    String getExtension();
+
     String getProperty(String type, String s);
 
     File getFile();

@@ -39,6 +39,10 @@ import org.whitesource.maven.utils.proxy.ProxySettingsProviderFactory;
  */
 public abstract class WhitesourceMojo extends AbstractMojo {
 
+    /* --- Static members --- */
+
+    private static final String DEFAULT_CONNECTION_TIMEOUT_MINUTES = "60";
+
     /* --- Members --- */
 
     /**
@@ -70,6 +74,9 @@ public abstract class WhitesourceMojo extends AbstractMojo {
 
     @Parameter(alias = "wssUrl", property = ClientConstants.SERVICE_URL_KEYWORD, required = false, defaultValue = ClientConstants.DEFAULT_SERVICE_URL)
     protected String wssUrl;
+
+    @Parameter(alias = "connectionTimeoutMinutes", property = ClientConstants.CONNECTION_TIMEOUT_KEYWORD, required = false, defaultValue = DEFAULT_CONNECTION_TIMEOUT_MINUTES)
+    protected int connectionTimeoutMinutes;
 
     protected WhitesourceService service;
 
@@ -116,7 +123,8 @@ public abstract class WhitesourceMojo extends AbstractMojo {
         }
         info("Service URL is " + serviceUrl);
 
-        service = new WhitesourceService(Constants.AGENT_TYPE, Constants.AGENT_VERSION, serviceUrl, autoDetectProxySettings);
+        service = new WhitesourceService(Constants.AGENT_TYPE, Constants.AGENT_VERSION, Constants.PLUGIN_VERSION,
+                serviceUrl, autoDetectProxySettings, connectionTimeoutMinutes);
         if (service == null) {
             info("Failed to initiate WhiteSource Service");
         } else {
