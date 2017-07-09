@@ -15,6 +15,7 @@
  */
 package org.whitesource.maven;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
@@ -180,7 +181,15 @@ public class UpdateMojo extends AgentMojo {
                 info("* " + projectName);
             }
         }
-        info("");
+
+        // request token
+        String requestToken = result.getRequestToken();
+        if (StringUtils.isNotBlank(requestToken)) {
+            info("");
+            info("Support Token: " + requestToken);
+        } else {
+            info("");
+        }
     }
 
 }
