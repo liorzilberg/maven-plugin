@@ -45,6 +45,15 @@ public abstract class AgentMojo extends WhitesourceMojo {
     protected boolean forceUpdate;
 
     /**
+     * Optional. Set to true to force check policies for all dependencies.
+     * If set to false policies will be checked only for new dependencies introduced to the WhiteSource projects.
+     *
+     * Important: Only used if {@link UpdateMojo#checkPolicies} is set to true.
+     */
+    @Parameter( alias = "forceCheckAllDependencies", property = Constants.FORCE_CHECK_ALL_DEPENDENCIES, required = false, defaultValue = "false")
+    protected boolean forceCheckAllDependencies;
+
+    /**
      * Product to update Name or Unique identifier.
      */
     @Parameter(alias = "product", property = Constants.PRODUCT, required = false)
@@ -163,6 +172,8 @@ public abstract class AgentMojo extends WhitesourceMojo {
     /* --- Protected methods --- */
 
     protected void init() {
+        super.init();
+
         // copy token for modules with special names into moduleTokens.
         for (Map.Entry<Object, Object> entry : specialModuleTokens.entrySet()) {
             moduleTokens.put(entry.getKey().toString(), entry.getValue().toString());
@@ -180,7 +191,21 @@ public abstract class AgentMojo extends WhitesourceMojo {
         }
 
         // properties
-        orgToken = session.getSystemProperties().getProperty(Constants.ORG_TOKEN, orgToken);
+        Properties systemProperties = session.getSystemProperties();
+        orgToken = systemProperties.getProperty(Constants.ORG_TOKEN, orgToken);
+        ignorePomModules = Boolean.parseBoolean(systemProperties.getProperty(Constants.IGNORE_POM_MODULES, Boolean.toString(ignorePomModules)));
+        forceUpdate = Boolean.parseBoolean(systemProperties.getProperty(Constants.FORCE_UPDATE, Boolean.toString(forceUpdate)));
+        product = systemProperties.getProperty(Constants.PRODUCT, product);
+        productVersion = systemProperties.getProperty(Constants.PRODUCT_VERSION, productVersion);
+        requesterEmail = systemProperties.getProperty(Constants.REQUESTER_EMAIL, requesterEmail);
+
+        forceCheckAllDependencies = Boolean.parseBoolean(systemProperties.getProperty(
+                Constants.FORCE_CHECK_ALL_DEPENDENCIES, Boolean.toString(forceCheckAllDependencies)));
+
+        // aggregate modules
+        aggregateModules = Boolean.parseBoolean(systemProperties.getProperty(Constants.AGGREGATE_MODULES, Boolean.toString(aggregateModules)));
+        aggregateProjectName = systemProperties.getProperty(Constants.AGGREGATE_MODULES_PROJECT_NAME, aggregateProjectName);
+        aggregateProjectToken = systemProperties.getProperty(Constants.AGGREGATE_MODULES_PROJECT_TOKEN, aggregateProjectToken);
     }
 
     private DependencyInfo getDependencyInfo(AetherDependencyNode dependencyNode) {

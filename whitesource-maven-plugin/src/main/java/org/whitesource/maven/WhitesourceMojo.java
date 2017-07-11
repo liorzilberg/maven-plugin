@@ -32,6 +32,8 @@ import org.whitesource.maven.utils.proxy.ProxySettings;
 import org.whitesource.maven.utils.proxy.ProxySettingsProvider;
 import org.whitesource.maven.utils.proxy.ProxySettingsProviderFactory;
 
+import java.util.Properties;
+
 /**
  * Concrete implementation holding common functionality to all goals in this plugin.
  *
@@ -115,6 +117,15 @@ public abstract class WhitesourceMojo extends AbstractMojo {
     }
 
     /* --- Protected methods --- */
+
+    protected void init() {
+        Properties systemProperties = session.getSystemProperties();
+        failOnError = Boolean.parseBoolean(systemProperties.getProperty(Constants.FAIL_ON_ERROR, Boolean.toString(failOnError)));
+        autoDetectProxySettings = Boolean.parseBoolean(systemProperties.getProperty(
+                Constants.AUTO_DETECT_PROXY_SETTINGS, Boolean.toString(autoDetectProxySettings)));
+        connectionTimeoutMinutes = Integer.parseInt(systemProperties.getProperty(
+                ClientConstants.CONNECTION_TIMEOUT_KEYWORD, String.valueOf(connectionTimeoutMinutes)));
+    }
 
     protected void createService() {
         String serviceUrl = session.getSystemProperties().getProperty(ClientConstants.SERVICE_URL_KEYWORD);

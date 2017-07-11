@@ -19,7 +19,6 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
-import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.DependencyResolutionException;
 import org.whitesource.agent.api.dispatch.CheckPolicyComplianceResult;
@@ -43,15 +42,6 @@ import java.util.Collection;
         requiresDependencyResolution = ResolutionScope.TEST,
         aggregator = true )
 public class CheckPoliciesMojo extends AgentMojo {
-
-    /* --- Members --- */
-
-    /**
-     * Optional. Set to true to force check policies for all dependencies.
-     * If set to false policies will be checked only for new dependencies introduced to the WhiteSource projects.
-     */
-    @Parameter( alias = "forceCheckAllDependencies", property = Constants.FORCE_CHECK_ALL_DEPENDENCIES, required = false, defaultValue = "false")
-    private boolean forceCheckAllDependencies;
 
     /* --- Constructors --- */
 
@@ -84,8 +74,6 @@ public class CheckPoliciesMojo extends AgentMojo {
     @Override
     protected void init() {
         super.init();
-        forceCheckAllDependencies = Boolean.parseBoolean(session.getSystemProperties().getProperty(
-                Constants.FORCE_CHECK_ALL_DEPENDENCIES, Boolean.toString(forceCheckAllDependencies)));
     }
 
     /* --- Private methods --- */
@@ -96,8 +84,7 @@ public class CheckPoliciesMojo extends AgentMojo {
             CheckPolicyComplianceResult result = service.checkPolicyCompliance(
                     orgToken, product, productVersion, projectInfos, forceCheckAllDependencies);
 
-            if (outputDirectory == null ||
-                    (!outputDirectory.exists() && !outputDirectory.mkdirs())) {
+            if (outputDirectory == null || (!outputDirectory.exists() && !outputDirectory.mkdirs())) {
                 warn("Output directory doesn't exist. Skipping policies check report.");
             } else {
                 generateReport(result);

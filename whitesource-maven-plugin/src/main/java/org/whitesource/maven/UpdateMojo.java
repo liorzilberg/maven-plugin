@@ -29,6 +29,7 @@ import org.whitesource.agent.api.model.AgentProjectInfo;
 import org.whitesource.agent.client.WssServiceException;
 
 import java.util.Collection;
+import java.util.Properties;
 
 /**
  * Send updates of open source software usage information to White Source.
@@ -62,15 +63,6 @@ public class UpdateMojo extends AgentMojo {
     @Parameter( alias = "checkPolicies", property = Constants.CHECK_POLICIES, required = false, defaultValue = "false")
     private boolean checkPolicies;
 
-    /**
-     * Optional. Set to true to force check policies for all dependencies.
-     * If set to false policies will be checked only for new dependencies introduced to the WhiteSource projects.
-     *
-     * Important: Only used if {@link UpdateMojo#checkPolicies} is set to true.
-     */
-    @Parameter( alias = "forceCheckAllDependencies", property = Constants.FORCE_CHECK_ALL_DEPENDENCIES, required = false, defaultValue = "false")
-    private boolean forceCheckAllDependencies;
-
     /* --- Constructors --- */
 
     public UpdateMojo() {
@@ -103,12 +95,8 @@ public class UpdateMojo extends AgentMojo {
 
     protected void init() {
         super.init();
-        checkPolicies = Boolean.parseBoolean(session.getSystemProperties().getProperty(
-                Constants.CHECK_POLICIES, Boolean.toString(checkPolicies)));
-        forceCheckAllDependencies = Boolean.parseBoolean(session.getSystemProperties().getProperty(
-                Constants.FORCE_CHECK_ALL_DEPENDENCIES, Boolean.toString(forceCheckAllDependencies)));
-        forceUpdate = Boolean.parseBoolean(session.getSystemProperties().getProperty(Constants.FORCE_UPDATE,
-                Boolean.toString(forceUpdate)));
+        Properties systemProperties = session.getSystemProperties();
+        checkPolicies = Boolean.parseBoolean(systemProperties.getProperty(Constants.CHECK_POLICIES, Boolean.toString(checkPolicies)));
     }
 
     private void sendUpdate(Collection<AgentProjectInfo> projectInfos) throws MojoFailureException, MojoExecutionException {
