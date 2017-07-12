@@ -428,7 +428,7 @@ public abstract class AgentMojo extends WhitesourceMojo {
             }
         } else if (excludes.length > 0) {
             process = !matchAny(project.getArtifactId(), excludes);
-            if (process) {
+            if (!process) {
                 info("Skipping " + project.getId() + " (marked as excluded)");
             }
         } else if (includes.length > 0) {
