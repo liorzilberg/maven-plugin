@@ -9,7 +9,7 @@
 
     <groupId>org.whitesource</groupId>
     <artifactId>whitesource-maven-parent</artifactId>
-    <version>3.2.9-SNAPSHOT</version>
+    <version>3.2.9</version>
     <packaging>pom</packaging>
 
     <modules>
@@ -34,7 +34,7 @@
         <connection>scm:git:git@github.com:whitesource/maven-plugin.git</connection>
         <developerConnection>scm:git:git@github.com:whitesource/maven-plugin.git</developerConnection>
         <url>git@github.com:whitesource/maven-plugin.git</url>
-        <tag>HEAD</tag>
+        <tag>release-tag-3.2.9</tag>
     </scm>
     <issueManagement>
         <url>https://github.com/whitesource/maven-plugin/issues</url>
