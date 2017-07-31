@@ -26,7 +26,7 @@ public final class Constants {
 
 	public static final String AGENT_TYPE = "maven-plugin";
 	public static final String AGENT_VERSION = "2.3.7";
-	public static final String PLUGIN_VERSION = "3.2.9";
+	public static final String PLUGIN_VERSION = "3.3.0";
 
 	public static final String PLUGIN_PREFIX = "org.whitesource.";
 	public static final String ORG_TOKEN = PLUGIN_PREFIX + "orgToken";
@@ -53,6 +53,7 @@ public final class Constants {
 	public static final String SKIP = PLUGIN_PREFIX + "skip";
 	public static final String ALTERNATIVE_SERVICE_URL_KEYWORD = PLUGIN_PREFIX + "wssUrl";
 	public static final String AUTO_DETECT_PROXY_SETTINGS = PLUGIN_PREFIX + "autoDetectProxySettings";
+	public static final String IGNORE_DEPENDENCY_RESOLUTION_ERRORS = PLUGIN_PREFIX + "ignoreDependencyResolutionErrors";
 
 	/* --- Errors --- */
 

@@ -158,6 +158,12 @@ public abstract class AgentMojo extends WhitesourceMojo {
     @Parameter(alias = "requesterEmail", property = Constants.REQUESTER_EMAIL, required = false)
     protected String requesterEmail;
 
+    /**
+     * Optional. Email of the requester as appears in WhiteSource.
+     */
+    @Parameter(alias = "ignoreDependencyResolutionErrors", property = Constants.IGNORE_DEPENDENCY_RESOLUTION_ERRORS, required = false, defaultValue = "false")
+    protected boolean ignoreDependencyResolutionErrors;
+
     /* --- Constructors --- */
 
     protected AgentMojo() {
@@ -201,6 +207,8 @@ public abstract class AgentMojo extends WhitesourceMojo {
 
         forceCheckAllDependencies = Boolean.parseBoolean(systemProperties.getProperty(
                 Constants.FORCE_CHECK_ALL_DEPENDENCIES, Boolean.toString(forceCheckAllDependencies)));
+        ignoreDependencyResolutionErrors = Boolean.parseBoolean(systemProperties.getProperty(
+                Constants.IGNORE_DEPENDENCY_RESOLUTION_ERRORS, Boolean.toString(ignoreDependencyResolutionErrors)));
 
         // aggregate modules
         aggregateModules = Boolean.parseBoolean(systemProperties.getProperty(Constants.AGGREGATE_MODULES, Boolean.toString(aggregateModules)));
@@ -299,8 +307,18 @@ public abstract class AgentMojo extends WhitesourceMojo {
         try {
            projectInfo.getDependencies().addAll(collectDependencyStructure(project));
         } catch (DependencyResolutionException e) {
-            error("Error resolving dependencies for project " + project.getName() + ", exiting");
-            throw e;
+            if (ignoreDependencyResolutionErrors) {
+                warn("Skipping project " + project.getArtifactId() + ", error resolving dependencies (ignoreDependencyResolutionErrors=true)");
+                warn("------------------------------------------------------");
+                warn(e.getMessage());
+                warn("------------------------------------------------------");
+
+                // don't include project in the scan
+                projectInfo = null;
+            } else {
+                error("Error resolving dependencies for project " + project.getArtifactId() + ", exiting");
+                throw e;
+            }
         }
 
         debug("Total Processing Time = " + (System.currentTimeMillis() - startTime) + " [msec]");
@@ -368,7 +386,10 @@ public abstract class AgentMojo extends WhitesourceMojo {
         Collection<AgentProjectInfo> projectInfos = new ArrayList<AgentProjectInfo>();
         for (MavenProject project : reactorProjects) {
             if (shouldProcess(project)) {
-                projectInfos.add(processProject(project));
+                AgentProjectInfo projectInfo = processProject(project);
+                if (projectInfo != null) {
+                    projectInfos.add(projectInfo);
+                }
             }
         }
         debugProjectInfos(projectInfos);
