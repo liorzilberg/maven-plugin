@@ -66,6 +66,7 @@ public final class Constants {
 	public static final String ERROR_SERVICE_CONNECTION = "Error communicating with service: ";
 	public static final String ERROR_CONNECTION_REFUSED = "Connection refused: ";
 	public static final String ERROR_SHA1 = "Error calculating SHA-1";
+	public static final String JAVA_NETWORK_EXCEPTION = "java.net";
 
 	/* --- Constructors --- */
 

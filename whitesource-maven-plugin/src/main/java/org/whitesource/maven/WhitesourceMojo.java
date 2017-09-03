@@ -186,6 +186,11 @@ public abstract class WhitesourceMojo extends AbstractMojo {
         }
     }
 
+    protected boolean isConnectionError(Exception e) {
+        // checks if a java network exception
+        return e.getCause() != null && e.getCause().getClass().getCanonicalName().contains(Constants.JAVA_NETWORK_EXCEPTION);
+    }
+
     protected void debug(CharSequence content) {
         final Log log = getLog();
         if (log != null) {

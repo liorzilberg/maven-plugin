@@ -135,8 +135,7 @@ public class UpdateMojo extends AgentMojo {
                 logResult(updateResult);
             }
         } catch (WssServiceException e) {
-            boolean connectionError = e.getMessage().contains(Constants.ERROR_CONNECTION_REFUSED);
-            if (connectionError) {
+            if (isConnectionError(e)) {
                 // try to re-connect
                 if (connectionRetries-- > 0) {
                     info(Constants.ATTEMPTING_TO_RECONNECT_MESSAGE);
@@ -147,7 +146,7 @@ public class UpdateMojo extends AgentMojo {
                     }
                     sendUpdate(projectInfos);
                 } else {
-                    throw new MojoExecutionException(Constants.ERROR_SERVICE_CONNECTION + e.getMessage(), e);
+                    throw new MojoExecutionException(Constants.ERROR_SERVICE_CONNECTION + Constants.ERROR_CONNECTION_REFUSED, e);
                 }
             } else {
                 throw new MojoExecutionException(Constants.ERROR_SERVICE_CONNECTION + e.getMessage(), e);
