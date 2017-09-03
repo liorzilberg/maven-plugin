@@ -44,6 +44,7 @@ public final class Constants {
 	public static final String INCLUDES = PLUGIN_PREFIX + "includes";
 	public static final String EXCLUDES = PLUGIN_PREFIX + "excludes";
 	public static final String SCOPE = PLUGIN_PREFIX + "scope";
+	public static final String IGNORED_SCOPES = PLUGIN_PREFIX + "ignoredScopes";
 	public static final String IGNORE_POM_MODULES = PLUGIN_PREFIX + "ignorePomModules";
 	public static final String AGGREGATE_MODULES = PLUGIN_PREFIX + "aggregateModules";
 	public static final String AGGREGATE_MODULES_PROJECT_NAME = PLUGIN_PREFIX + "aggregateProjectName";
