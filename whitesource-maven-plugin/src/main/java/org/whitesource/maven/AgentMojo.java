@@ -117,8 +117,17 @@ public abstract class AgentMojo extends WhitesourceMojo {
 
     /**
      * Optional. Scopes to be ignored (default "test" and "provided").
+     *
+     * @deprecated use {@link AgentMojo#ignoredScopes} instead.
      */
+    @Deprecated
     @Parameter(alias = "ignoredScopes", property = Constants.SCOPE, required = false)
+    protected String[] scope;
+
+    /**
+     * Optional. Scopes to be ignored (default "test" and "provided").
+     */
+    @Parameter(alias = "ignoredScopes", property = Constants.IGNORED_SCOPES, required = false)
     protected String[] ignoredScopes;
 
     /**
@@ -167,12 +176,6 @@ public abstract class AgentMojo extends WhitesourceMojo {
     /* --- Constructors --- */
 
     protected AgentMojo() {
-        // set default values
-        if (ignoredScopes == null) {
-            ignoredScopes = new String[2];
-            ignoredScopes[0] = SCOPE_TEST;
-            ignoredScopes[1] = SCOPE_PROVIDED;
-        }
     }
 
     /* --- Protected methods --- */
@@ -214,6 +217,36 @@ public abstract class AgentMojo extends WhitesourceMojo {
         aggregateModules = Boolean.parseBoolean(systemProperties.getProperty(Constants.AGGREGATE_MODULES, Boolean.toString(aggregateModules)));
         aggregateProjectName = systemProperties.getProperty(Constants.AGGREGATE_MODULES_PROJECT_NAME, aggregateProjectName);
         aggregateProjectToken = systemProperties.getProperty(Constants.AGGREGATE_MODULES_PROJECT_TOKEN, aggregateProjectToken);
+
+        // ignored scopes
+        Set<String> ignoredScopeSet = new HashSet<String>();
+        // read from deprecated 'scope' parameter
+        if (scope != null) {
+            for (String ignoredScope : scope) {
+                ignoredScopeSet.add(ignoredScope);
+            }
+        }
+
+        // read from 'ignoredScopes' parameter
+        if (ignoredScopes != null) {
+            for (String ignoredScope : ignoredScopes) {
+                ignoredScopeSet.add(ignoredScope);
+            }
+        }
+
+        // combine both (just in case)
+        if (ignoredScopeSet.isEmpty()) {
+            // set default values
+            ignoredScopes = new String[2];
+            ignoredScopes[0] = SCOPE_TEST;
+            ignoredScopes[1] = SCOPE_PROVIDED;
+        } else {
+            ignoredScopes = new String[ignoredScopeSet.size()];
+            int i = 0;
+            for (String ignoredScope : ignoredScopeSet) {
+                ignoredScopes[i++] = ignoredScope;
+            }
+        }
     }
 
     private DependencyInfo getDependencyInfo(AetherDependencyNode dependencyNode) {
