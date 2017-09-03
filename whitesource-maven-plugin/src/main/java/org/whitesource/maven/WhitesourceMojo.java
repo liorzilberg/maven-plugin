@@ -44,6 +44,8 @@ public abstract class WhitesourceMojo extends AbstractMojo {
     /* --- Static members --- */
 
     private static final String DEFAULT_CONNECTION_TIMEOUT_MINUTES = "60";
+    private static final String DEFAULT_CONNECTION_RETRIES = "1";
+    protected static final Integer DEFAULT_CONNECTION_DELAY_TIME = 3000;
 
     /* --- Members --- */
 
@@ -76,6 +78,12 @@ public abstract class WhitesourceMojo extends AbstractMojo {
 
     @Parameter(alias = "wssUrl", property = ClientConstants.SERVICE_URL_KEYWORD, required = false, defaultValue = ClientConstants.DEFAULT_SERVICE_URL)
     protected String wssUrl;
+
+    @Parameter(alias = "failOnConnectionError", property = Constants.FAIL_ON_CONNECTION_ERROR, required = false, defaultValue = "true")
+    protected boolean failOnConnectionError;
+
+    @Parameter(alias = "connectionRetries", property = Constants.CONNECTION_RETRIES, required = false, defaultValue = DEFAULT_CONNECTION_RETRIES)
+    protected int connectionRetries;
 
     @Parameter(alias = "connectionTimeoutMinutes", property = ClientConstants.CONNECTION_TIMEOUT_KEYWORD, required = false, defaultValue = DEFAULT_CONNECTION_TIMEOUT_MINUTES)
     protected int connectionTimeoutMinutes;
@@ -125,6 +133,8 @@ public abstract class WhitesourceMojo extends AbstractMojo {
                 Constants.AUTO_DETECT_PROXY_SETTINGS, Boolean.toString(autoDetectProxySettings)));
         connectionTimeoutMinutes = Integer.parseInt(systemProperties.getProperty(
                 ClientConstants.CONNECTION_TIMEOUT_KEYWORD, String.valueOf(connectionTimeoutMinutes)));
+        failOnConnectionError = Boolean.parseBoolean(systemProperties.getProperty(Constants.FAIL_ON_CONNECTION_ERROR, Boolean.toString(failOnConnectionError)));
+        connectionRetries = Integer.parseInt(systemProperties.getProperty(Constants.CONNECTION_RETRIES, String.valueOf(connectionRetries)));
     }
 
     protected void createService() {
@@ -161,7 +171,14 @@ public abstract class WhitesourceMojo extends AbstractMojo {
         String message = error.getMessage();
         boolean failOnError = Boolean.valueOf(session.getSystemProperties().getProperty(
                 Constants.FAIL_ON_ERROR, String.valueOf(this.failOnError)));
-        if (failOnError) {
+        boolean failOnConnectionError = Boolean.valueOf(session.getSystemProperties().getProperty(
+                Constants.FAIL_ON_CONNECTION_ERROR, String.valueOf(this.failOnConnectionError)));
+        boolean connectionError = error.getMessage().contains(Constants.ERROR_CONNECTION_REFUSED);
+
+        if (connectionError && failOnConnectionError) {
+            debug(message, error);
+            throw new MojoFailureException(message);
+        } else if (!connectionError && failOnError) {
             debug(message, error);
             throw new MojoFailureException(message);
         } else {

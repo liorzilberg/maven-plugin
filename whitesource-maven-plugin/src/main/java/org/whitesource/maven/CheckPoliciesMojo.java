@@ -97,7 +97,23 @@ public class CheckPoliciesMojo extends AgentMojo {
                 info("All dependencies conform with the organization's policies.");
             }
         } catch (WssServiceException e) {
-            throw new MojoExecutionException(Constants.ERROR_SERVICE_CONNECTION + e.getMessage(), e);
+            boolean connectionError = e.getMessage().contains(Constants.ERROR_CONNECTION_REFUSED);
+            if (connectionError) {
+                // try to re-connect
+                if (connectionRetries-- > 0) {
+                    info(Constants.ATTEMPTING_TO_RECONNECT_MESSAGE);
+                    try {
+                        Thread.sleep(DEFAULT_CONNECTION_DELAY_TIME);
+                    } catch (InterruptedException e1) {
+                        // do nothing
+                    }
+                    sendCheckPolicies(projectInfos);
+                } else {
+                    throw new MojoExecutionException(Constants.ERROR_SERVICE_CONNECTION + e.getMessage(), e);
+                }
+            } else {
+                throw new MojoExecutionException(Constants.ERROR_SERVICE_CONNECTION + e.getMessage(), e);
+            }
         }
     }
 

@@ -50,7 +50,6 @@ public class UpdateMojo extends AgentMojo {
     /* --- Static members --- */
 
     public static final String POLICY_VIOLATIONS_FOUND = "Some dependencies were rejected by the organization's policies";
-
     public static final String NO_POLICY_VIOLATIONS = "All dependencies conform with the organization's policies";
     public static final String SENDING_FORCE_UPDATE = "Force Update Enabled, Sending Update Request to WhiteSource";
     public static final String SENDING_UPDATE = "Sending Update Request to WhiteSource";
@@ -136,7 +135,23 @@ public class UpdateMojo extends AgentMojo {
                 logResult(updateResult);
             }
         } catch (WssServiceException e) {
-            throw new MojoExecutionException(Constants.ERROR_SERVICE_CONNECTION + e.getMessage(), e);
+            boolean connectionError = e.getMessage().contains(Constants.ERROR_CONNECTION_REFUSED);
+            if (connectionError) {
+                // try to re-connect
+                if (connectionRetries-- > 0) {
+                    info(Constants.ATTEMPTING_TO_RECONNECT_MESSAGE);
+                    try {
+                        Thread.sleep(DEFAULT_CONNECTION_DELAY_TIME);
+                    } catch (InterruptedException e1) {
+                        // do nothing
+                    }
+                    sendUpdate(projectInfos);
+                } else {
+                    throw new MojoExecutionException(Constants.ERROR_SERVICE_CONNECTION + e.getMessage(), e);
+                }
+            } else {
+                throw new MojoExecutionException(Constants.ERROR_SERVICE_CONNECTION + e.getMessage(), e);
+            }
         }
     }
 
