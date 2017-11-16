@@ -14,6 +14,7 @@ import org.whitesource.maven.utils.dependencies.*;
 import java.io.File;
 import java.io.IOException;
 import java.text.MessageFormat;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -31,6 +32,12 @@ public abstract class AgentMojo extends WhitesourceMojo {
     private static final String FILENAME_PATTERN = "{0}-{1}.{2}";
 
     /* --- Members --- */
+
+    /**
+     * Logging Time format
+     */
+    @Parameter(alias = "timeFormat", property = Constants.TIME_FORMAT, required = false)
+    protected String timeFormat;
 
     /**
      * Unique identifier of the organization to update.
@@ -201,6 +208,14 @@ public abstract class AgentMojo extends WhitesourceMojo {
 
         // properties
         Properties systemProperties = session.getSystemProperties();
+
+        // initialize time format
+        timeFormat = systemProperties.getProperty(Constants.TIME_FORMAT, timeFormat);
+        if(timeFormat == null){
+            timeFormat = Constants.DEFAULT_TIME_FORMAT;
+        }
+        dateFormat = new SimpleDateFormat(timeFormat);
+
         orgToken = systemProperties.getProperty(Constants.ORG_TOKEN, orgToken);
         ignorePomModules = Boolean.parseBoolean(systemProperties.getProperty(Constants.IGNORE_POM_MODULES, Boolean.toString(ignorePomModules)));
         forceUpdate = Boolean.parseBoolean(systemProperties.getProperty(Constants.FORCE_UPDATE, Boolean.toString(forceUpdate)));

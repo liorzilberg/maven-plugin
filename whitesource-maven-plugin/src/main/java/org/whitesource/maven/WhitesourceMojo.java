@@ -32,6 +32,9 @@ import org.whitesource.maven.utils.proxy.ProxySettings;
 import org.whitesource.maven.utils.proxy.ProxySettingsProvider;
 import org.whitesource.maven.utils.proxy.ProxySettingsProviderFactory;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Properties;
 
 /**
@@ -48,6 +51,9 @@ public abstract class WhitesourceMojo extends AbstractMojo {
     protected static final Integer DEFAULT_CONNECTION_DELAY_TIME = 3000;
 
     /* --- Members --- */
+
+    private final Log log = getLog();
+    protected DateFormat dateFormat = new SimpleDateFormat(Constants.DEFAULT_TIME_FORMAT);
 
     /**
      * Indicates whether the build will continue even if there are errors.
@@ -192,53 +198,51 @@ public abstract class WhitesourceMojo extends AbstractMojo {
     }
 
     protected void debug(CharSequence content) {
-        final Log log = getLog();
         if (log != null) {
-            log.debug(content);
+            log.debug(getFormattedContent(content));
         }
     }
 
     protected void debug(CharSequence content, Throwable error) {
-        final Log log = getLog();
         if (log != null) {
-            log.debug(content, error);
+            log.debug(getFormattedContent(content), error);
         }
     }
 
+    protected CharSequence getFormattedContent(CharSequence content){
+        Date date = new Date();
+        return dateFormat.format(date) + content;
+    }
+
     protected void info(CharSequence content) {
-        final Log log = getLog();
         if (log != null) {
-            log.info(content);
+            log.info(getFormattedContent(content));
         }
     }
 
     protected void warn(CharSequence content, Throwable error) {
-        final Log log = getLog();
         if (log != null) {
-            log.debug(content, error);
-            log.warn(content);
+            log.debug(getFormattedContent(content), error);
+            log.warn(getFormattedContent(content));
         }
     }
 
     protected void warn(CharSequence content) {
-        final Log log = getLog();
         if (log != null) {
-            log.warn(content);
+            log.warn(getFormattedContent(content));
         }
     }
 
     protected void error(CharSequence content, Throwable error) {
-        final Log log = getLog();
         if (log != null) {
-            log.debug(content, error);
-            log.error(content);
+            log.debug(getFormattedContent(content), error);
+            log.error(getFormattedContent(content));
         }
     }
 
     protected void error(CharSequence content) {
-        final Log log = getLog();
         if (log != null) {
-            log.error(content);
+            log.error(getFormattedContent(content));
         }
     }
 }

@@ -29,6 +29,7 @@ public final class Constants {
 	public static final String PLUGIN_VERSION = "3.3.0";
 
 	public static final String PLUGIN_PREFIX = "org.whitesource.";
+	public static final String TIME_FORMAT = PLUGIN_PREFIX + "timeFormat";
 	public static final String ORG_TOKEN = PLUGIN_PREFIX + "orgToken";
 	public static final String PRODUCT = PLUGIN_PREFIX + "product";
 	public static final String PRODUCT_VERSION = PLUGIN_PREFIX + "productVersion";
@@ -61,6 +62,7 @@ public final class Constants {
 	/* --- Messages --- */
 
 	public static final String ATTEMPTING_TO_RECONNECT_MESSAGE = "Attempting to reconnect to WhiteSource";
+	public static final String DEFAULT_TIME_FORMAT = "[HH:mm:ss] ";
 
 	/* --- Errors --- */
 
