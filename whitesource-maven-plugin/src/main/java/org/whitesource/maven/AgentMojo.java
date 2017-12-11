@@ -73,12 +73,6 @@ public abstract class AgentMojo extends WhitesourceMojo {
     protected String productVersion;
 
     /**
-     * Optional. Set to false to include test scope dependencies.
-     */
-    @Parameter(alias = "ignoreTestScopeDependencies", property = Constants.IGNORE_TEST_SCOPE_DEPENDENCIES, required = false, defaultValue = "true")
-    protected boolean ignoreTestScopeDependencies;
-
-    /**
      * Output directory for checking policies results.
      */
     @Parameter( alias = "outputDirectory", property = Constants.OUTPUT_DIRECTORY, required = false, defaultValue = "${project.reporting.outputDirectory}")
