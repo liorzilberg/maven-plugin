@@ -8,6 +8,7 @@ phases:
       #- curl -LJO https://s3.amazonaws.com/file-system-agent/whitesource-fs-agent-18.1.1.jar
       - curl -LJO https://drive.google.com/open?id=1iMxpGHiDp0Lxu0Mx2got0Qs-rBm1jsN4
       - curl -LJO https://github.com/whitesource/fs-agent-distribution/standAlone/whitesource-fs-agent.config
+      - ls
   build:
     commands:
       - mvn clean install
