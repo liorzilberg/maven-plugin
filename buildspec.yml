@@ -15,8 +15,8 @@ phases:
       # - command
   pre_build:
     commands:
-      - curl -LJO https://github.com/whitesource/fs-agent-distribution/standAlone/whitesource-fs-agent-18.1.1.jar
-      - curl -LJO https://github.com/whitesource/fs-agent-distribution/standAlone/whitesource-fs-agent.config
+      #- curl -LJO https://github.com/whitesource/fs-agent-distribution/standAlone/whitesource-fs-agent-18.1.1.jar
+      #- curl -LJO https://github.com/whitesource/fs-agent-distribution/standAlone/whitesource-fs-agent.config
   build:
     commands:
       - mvn clean install
