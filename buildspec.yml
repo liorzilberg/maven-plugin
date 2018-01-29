@@ -4,9 +4,8 @@ version: 0.2
 phases:
   pre_build:
     commands:
-      #- curl -LJO https://github.com/whitesource/fs-agent-distribution/standAlone/whitesource-fs-agent-18.1.1.jar
+      - curl -LJO https://github.com/whitesource/fs-agent-distribution/standAlone/whitesource-fs-agent-18.1.1.jar
       #- curl -LJO https://s3.amazonaws.com/file-system-agent/whitesource-fs-agent-18.1.1.jar
-      - curl -LJO https://drive.google.com/open?id=1iMxpGHiDp0Lxu0Mx2got0Qs-rBm1jsN4
       - curl -LJO https://github.com/whitesource/fs-agent-distribution/standAlone/whitesource-fs-agent.config
       - ls
   build:
@@ -14,7 +13,7 @@ phases:
       - mvn clean install
   post_build:
     commands:
-      - java -jar whitesource-fs-agent-18.1.2-SNAPSHOT.jar -c whitesource-fs-agent.config -d . -apiKey 465d4d8873ea4a8fb982cf063c999bac45654261d45240d4810b91881f0e64ee -project code-build-test
+      - java -jar whitesource-fs-agent-18.1.1.jar -c whitesource-fs-agent.config -d . -apiKey 465d4d8873ea4a8fb982cf063c999bac45654261d45240d4810b91881f0e64ee -project code-build-test
 artifacts:
   files:
      - '**/*'
