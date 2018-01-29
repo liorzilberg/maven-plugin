@@ -11,9 +11,7 @@ phases:
       - mvn clean install
   post_build:
     commands:
-      - ls
-      - java -jar whitesource-fs-agent-18.1.1.jar
-      #- java -jar whitesource-fs-agent-18.1.1.jar -c whitesource-fs-agent.config -d . -apiKey 465d4d8873ea4a8fb982cf063c999bac45654261d45240d4810b91881f0e64ee -project code-build-test
+      - java -jar whitesource-fs-agent-18.1.jar -c whitesource-fs-agent.config -d . -apiKey 465d4d8873ea4a8fb982cf063c999bac45654261d45240d4810b91881f0e64ee -project code-build-test
 artifacts:
   files:
      - '**/*'
