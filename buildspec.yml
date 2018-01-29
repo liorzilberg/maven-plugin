@@ -1,6 +1,18 @@
-version: 0.1
+version: 0.2
+
+#env:
+  #variables:
+     # key: "value"
+     # key: "value"
+  #parameter-store:
+     # key: "value"
+     # key: "value"
 
 phases:
+  #install:
+    #commands:
+      # - command
+      # - command
   pre_build:
     commands:
       - curl -LJO https://github.com/whitesource/fs-agent-distribution/standAlone/whitesource-fs-agent-18.1.1.jar
@@ -8,10 +20,9 @@ phases:
   build:
     commands:
       - mvn clean install
+      # - command
   post_build:
     commands:
-      - pwd
-      - ls
       - java -jar whitesource-fs-agent-18.1.1.jar -c whitesource-fs-agent.config -d . -apiKey 465d4d8873ea4a8fb982cf063c999bac45654261d45240d4810b91881f0e64ee -project code-build-test
 artifacts:
   files:
