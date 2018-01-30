@@ -3,6 +3,7 @@ version: 0.2
 evn:
   variables:
     AGENT_VERSION: "18.1.1"
+  parameter-store:
 
 
 phases:
