@@ -1,7 +1,7 @@
-version: 0.1
+version: 0.2
 
 evn:
-  parameter-store:
+  variables:
     AGENT_VERSION: "18.1.1"
 
 
