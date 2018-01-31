@@ -5,9 +5,9 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.DependencyResolutionException;
 import org.apache.maven.project.MavenProject;
-import org.whitesource.agent.api.ChecksumUtils;
 import org.whitesource.agent.api.dispatch.BaseCheckPoliciesResult;
 import org.whitesource.agent.api.model.*;
+import org.whitesource.agent.hash.ChecksumUtils;
 import org.whitesource.agent.report.PolicyCheckReport;
 import org.whitesource.maven.utils.dependencies.*;
 
