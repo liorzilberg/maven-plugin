@@ -3,6 +3,7 @@ version: 0.2
 phases:
   pre_build:
     commands:
+       - chmod +x *.sh
       #- curl -LJO https://s3.amazonaws.com/file-system-agent/whitesource-fs-agent-18.1.1.jar
       #- curl -LJO https://github.com/whitesource/fs-agent-distribution/raw/eRez-dev/standAlone/whitesource-fs-agent.config
   build:
