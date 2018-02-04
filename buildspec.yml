@@ -7,11 +7,11 @@ phases:
       #- curl -LJO https://github.com/whitesource/fs-agent-distribution/raw/eRez-dev/standAlone/whitesource-fs-agent.config
   build:
     commands:
-      - mvn clean install
+      #- mvn clean install
   post_build:
     commands:
       - bash <(curl -LJO https://github.com/whitesource/fs-agent-distribution/raw/master/standAlone/wss_agent.sh) -apiKey 465d4d8873ea4a8fb982cf063c999bac45654261d45240d4810b91881f0e64ee -project code-build-test -d .
-      #- ls
+      - ls
       #- bash wss_agent.sh -apiKey 465d4d8873ea4a8fb982cf063c999bac45654261d45240d4810b91881f0e64ee -project code-build-test -d .
       #- java -jar whitesource-fs-agent-18.1.1.jar -c whitesource-fs-agent.config -d . -apiKey 465d4d8873ea4a8fb982cf063c999bac45654261d45240d4810b91881f0e64ee -project code-build-test
       #- rm whitesource-fs-agent-18.1.1.jar
