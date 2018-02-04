@@ -8,7 +8,7 @@ phases:
       #- curl -LJO https://github.com/whitesource/fs-agent-distribution/raw/eRez-dev/standAlone/whitesource-fs-agent.config
   build:
     commands:
-      #- mvn clean install
+      - mvn clean install
   post_build:
     commands:
       - ls
