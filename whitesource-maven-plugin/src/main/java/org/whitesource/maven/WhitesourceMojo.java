@@ -94,6 +94,9 @@ public abstract class WhitesourceMojo extends AbstractMojo {
     @Parameter(alias = "connectionTimeoutMinutes", property = ClientConstants.CONNECTION_TIMEOUT_KEYWORD, required = false, defaultValue = DEFAULT_CONNECTION_TIMEOUT_MINUTES)
     protected int connectionTimeoutMinutes;
 
+    @Parameter(alias = "ignoreCertificateCheck", property = Constants.IGNORE_CERTIFICATE_CHECK,   required = false, defaultValue = "false")
+    protected boolean ignoreCertificateCheck;
+
     protected WhitesourceService service;
 
     /* --- Abstract methods --- */
@@ -112,6 +115,7 @@ public abstract class WhitesourceMojo extends AbstractMojo {
             info("Skipping update");
         } else {
             try {
+
                 createService();
                 doExecute();
             } catch (DependencyResolutionException e) {
@@ -141,6 +145,7 @@ public abstract class WhitesourceMojo extends AbstractMojo {
                 ClientConstants.CONNECTION_TIMEOUT_KEYWORD, String.valueOf(connectionTimeoutMinutes)));
         failOnConnectionError = Boolean.parseBoolean(systemProperties.getProperty(Constants.FAIL_ON_CONNECTION_ERROR, Boolean.toString(failOnConnectionError)));
         connectionRetries = Integer.parseInt(systemProperties.getProperty(Constants.CONNECTION_RETRIES, String.valueOf(connectionRetries)));
+        ignoreCertificateCheck = Boolean.parseBoolean(systemProperties.getProperty(Constants.IGNORE_CERTIFICATE_CHECK, Boolean.toString(ignoreCertificateCheck)));
     }
 
     protected void createService() {
@@ -151,7 +156,7 @@ public abstract class WhitesourceMojo extends AbstractMojo {
         info("Service URL is " + serviceUrl);
 
         service = new WhitesourceService(Constants.AGENT_TYPE, Constants.AGENT_VERSION, Constants.PLUGIN_VERSION,
-                serviceUrl, autoDetectProxySettings, connectionTimeoutMinutes);
+                serviceUrl, autoDetectProxySettings, connectionTimeoutMinutes, ignoreCertificateCheck);
         if (service == null) {
             info("Failed to initiate WhiteSource Service");
         } else {
