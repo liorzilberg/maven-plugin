@@ -49,6 +49,7 @@ public abstract class WhitesourceMojo extends AbstractMojo {
     private static final String DEFAULT_CONNECTION_TIMEOUT_MINUTES = "60";
     private static final String DEFAULT_CONNECTION_RETRIES = "1";
     private static final String DEFAULT_CONNECTION_RETRY_INTERVAL = "3000";
+    private static final String DEFAULT_CONNECTION_IGNORE_CERTIFICATE_CHECK = "false";
 
     /* --- Members --- */
 
@@ -93,6 +94,9 @@ public abstract class WhitesourceMojo extends AbstractMojo {
 
     @Parameter(alias = "connectionRetryInterval", property = Constants.CONNECTION_RETRY_INTERVAL, required = false, defaultValue = DEFAULT_CONNECTION_RETRY_INTERVAL)
     protected int connectionRetryInterval;
+
+    @Parameter(alias = "ignoreCertificateCheck", property = Constants.CONNECTION_IGNORE_CERTIFICATE_CHECK, required = false, defaultValue = DEFAULT_CONNECTION_IGNORE_CERTIFICATE_CHECK)
+    protected boolean ignoreCertificateCheck;
 
     @Parameter(alias = "connectionTimeoutMinutes", property = ClientConstants.CONNECTION_TIMEOUT_KEYWORD, required = false, defaultValue = DEFAULT_CONNECTION_TIMEOUT_MINUTES)
     protected int connectionTimeoutMinutes;
@@ -145,6 +149,7 @@ public abstract class WhitesourceMojo extends AbstractMojo {
         failOnConnectionError = Boolean.parseBoolean(systemProperties.getProperty(Constants.FAIL_ON_CONNECTION_ERROR, Boolean.toString(failOnConnectionError)));
         connectionRetries = Integer.parseInt(systemProperties.getProperty(Constants.CONNECTION_RETRIES, String.valueOf(connectionRetries)));
         connectionRetryInterval = Integer.parseInt(systemProperties.getProperty(Constants.CONNECTION_RETRY_INTERVAL, String.valueOf(connectionRetryInterval)));
+        ignoreCertificateCheck = Boolean.parseBoolean(systemProperties.getProperty(Constants.CONNECTION_IGNORE_CERTIFICATE_CHECK, String.valueOf(ignoreCertificateCheck)));
     }
 
     protected void createService() {
@@ -155,7 +160,7 @@ public abstract class WhitesourceMojo extends AbstractMojo {
         info("Service URL is " + serviceUrl);
 
         service = new WhitesourceService(Constants.AGENT_TYPE, Constants.AGENT_VERSION, Constants.PLUGIN_VERSION,
-                serviceUrl, autoDetectProxySettings, connectionTimeoutMinutes);
+                serviceUrl, autoDetectProxySettings, connectionTimeoutMinutes, ignoreCertificateCheck);
         if (service == null) {
             info("Failed to initiate WhiteSource Service");
         } else {
