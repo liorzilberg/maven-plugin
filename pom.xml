@@ -263,9 +263,9 @@
                 <plugin>
                     <groupId>org.whitesource</groupId>
                     <artifactId>whitesource-maven-plugin</artifactId>
-                    <version>3.2.5</version>
+                    <version>3.3.2-SNAPSHOT</version>
                     <configuration>
-                        <orgToken>${whitesource.orgToken}</orgToken>
+                        <orgToken>token</orgToken>
                     </configuration>
                 </plugin>
             </plugins>

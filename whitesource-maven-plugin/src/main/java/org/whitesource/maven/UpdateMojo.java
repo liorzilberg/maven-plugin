@@ -140,11 +140,11 @@ public class UpdateMojo extends AgentMojo {
                 if (connectionRetries-- > 0) {
                     info(Constants.ATTEMPTING_TO_RECONNECT_MESSAGE);
                     try {
-                        Thread.sleep(DEFAULT_CONNECTION_DELAY_TIME);
+                        Thread.sleep(connectionRetryInterval);
                     } catch (InterruptedException e1) {
                         // do nothing
                     }
-                    sendUpdate(projectInfos);
+                        sendUpdate(projectInfos);
                 } else {
                     throw new MojoExecutionException(Constants.ERROR_SERVICE_CONNECTION + Constants.ERROR_CONNECTION_REFUSED, e);
                 }

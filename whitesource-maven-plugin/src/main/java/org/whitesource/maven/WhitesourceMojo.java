@@ -48,7 +48,7 @@ public abstract class WhitesourceMojo extends AbstractMojo {
 
     private static final String DEFAULT_CONNECTION_TIMEOUT_MINUTES = "60";
     private static final String DEFAULT_CONNECTION_RETRIES = "1";
-    protected static final Integer DEFAULT_CONNECTION_DELAY_TIME = 3000;
+    private static final String DEFAULT_CONNECTION_RETRY_INTERVAL = "3000";
 
     /* --- Members --- */
 
@@ -90,6 +90,9 @@ public abstract class WhitesourceMojo extends AbstractMojo {
 
     @Parameter(alias = "connectionRetries", property = Constants.CONNECTION_RETRIES, required = false, defaultValue = DEFAULT_CONNECTION_RETRIES)
     protected int connectionRetries;
+
+    @Parameter(alias = "connectionRetryInterval", property = Constants.CONNECTION_RETRY_INTERVAL, required = false, defaultValue = DEFAULT_CONNECTION_RETRY_INTERVAL)
+    protected int connectionRetryInterval;
 
     @Parameter(alias = "connectionTimeoutMinutes", property = ClientConstants.CONNECTION_TIMEOUT_KEYWORD, required = false, defaultValue = DEFAULT_CONNECTION_TIMEOUT_MINUTES)
     protected int connectionTimeoutMinutes;
@@ -141,6 +144,7 @@ public abstract class WhitesourceMojo extends AbstractMojo {
                 ClientConstants.CONNECTION_TIMEOUT_KEYWORD, String.valueOf(connectionTimeoutMinutes)));
         failOnConnectionError = Boolean.parseBoolean(systemProperties.getProperty(Constants.FAIL_ON_CONNECTION_ERROR, Boolean.toString(failOnConnectionError)));
         connectionRetries = Integer.parseInt(systemProperties.getProperty(Constants.CONNECTION_RETRIES, String.valueOf(connectionRetries)));
+        connectionRetryInterval = Integer.parseInt(systemProperties.getProperty(Constants.CONNECTION_RETRY_INTERVAL, String.valueOf(connectionRetryInterval)));
     }
 
     protected void createService() {

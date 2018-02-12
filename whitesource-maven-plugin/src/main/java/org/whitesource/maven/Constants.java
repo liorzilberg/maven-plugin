@@ -56,6 +56,7 @@ public final class Constants {
 	public static final String ALTERNATIVE_SERVICE_URL_KEYWORD = PLUGIN_PREFIX + "wssUrl";
 	public static final String FAIL_ON_CONNECTION_ERROR = PLUGIN_PREFIX + "failOnConnectionError";
 	public static final String CONNECTION_RETRIES = PLUGIN_PREFIX + "connectionRetries";
+	public static final String CONNECTION_RETRY_INTERVAL = PLUGIN_PREFIX + "connectionRetryInterval";
 	public static final String AUTO_DETECT_PROXY_SETTINGS = PLUGIN_PREFIX + "autoDetectProxySettings";
 	public static final String IGNORE_DEPENDENCY_RESOLUTION_ERRORS = PLUGIN_PREFIX + "ignoreDependencyResolutionErrors";
 
