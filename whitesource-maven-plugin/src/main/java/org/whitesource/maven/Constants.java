@@ -59,6 +59,7 @@ public final class Constants {
 	public static final String CONNECTION_IGNORE_CERTIFICATE_CHECK = PLUGIN_PREFIX + "ignoreCertificateCheck";
 	public static final String AUTO_DETECT_PROXY_SETTINGS = PLUGIN_PREFIX + "autoDetectProxySettings";
 	public static final String IGNORE_DEPENDENCY_RESOLUTION_ERRORS = PLUGIN_PREFIX + "ignoreDependencyResolutionErrors";
+	public static final String ENABLE_DEBUG = PLUGIN_PREFIX + "enableDebug";
 
 	/* --- Messages --- */
 
