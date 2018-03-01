@@ -2,6 +2,7 @@ package org.whitesource.maven;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.DependencyResolutionException;
 import org.apache.maven.project.MavenProject;
@@ -11,7 +12,9 @@ import org.whitesource.agent.api.model.*;
 import org.whitesource.agent.report.PolicyCheckReport;
 import org.whitesource.maven.utils.dependencies.*;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
@@ -42,7 +45,7 @@ public abstract class AgentMojo extends WhitesourceMojo {
     /**
      * Unique identifier of the organization to update.
      */
-    @Parameter(alias = "orgToken", property = Constants.ORG_TOKEN, required = true)
+    @Parameter(alias = "orgToken", property = Constants.ORG_TOKEN, required = false)
     protected String orgToken;
 
     /**
@@ -174,6 +177,12 @@ public abstract class AgentMojo extends WhitesourceMojo {
     @Parameter(alias = "ignoreDependencyResolutionErrors", property = Constants.IGNORE_DEPENDENCY_RESOLUTION_ERRORS, required = false, defaultValue = "false")
     protected boolean ignoreDependencyResolutionErrors;
 
+    /**
+     * Optional. Path to file that contains the org token.
+     */
+    @Parameter(alias = "orgTokenFile", property = Constants.ORG_TOKEN_FILE, required = false)
+    protected String orgTokenFile;
+
     /* --- Constructors --- */
 
     protected AgentMojo() {
@@ -181,7 +190,7 @@ public abstract class AgentMojo extends WhitesourceMojo {
 
     /* --- Protected methods --- */
 
-    protected void init() {
+    protected void init() throws MojoFailureException {
         super.init();
 
         // copy token for modules with special names into moduleTokens.
@@ -210,7 +219,18 @@ public abstract class AgentMojo extends WhitesourceMojo {
         }
         dateFormat = new SimpleDateFormat(timeFormat);
 
-        orgToken = systemProperties.getProperty(Constants.ORG_TOKEN, orgToken);
+        // read org token from dedicated file
+        orgTokenFile = systemProperties.getProperty(Constants.ORG_TOKEN_FILE, orgTokenFile);
+        String orgTokenFromFile = readOrgTokenFile();
+        if (StringUtils.isNotEmpty(orgTokenFromFile)) {
+            orgToken = orgTokenFromFile;
+        } else {
+            orgToken = systemProperties.getProperty(Constants.ORG_TOKEN, orgToken);
+        }
+        if (StringUtils.isEmpty(orgToken)) {
+            throw new MojoFailureException("The parameter 'orgToken' is missing or invalid");
+        }
+
         ignorePomModules = Boolean.parseBoolean(systemProperties.getProperty(Constants.IGNORE_POM_MODULES, Boolean.toString(ignorePomModules)));
         forceUpdate = Boolean.parseBoolean(systemProperties.getProperty(Constants.FORCE_UPDATE, Boolean.toString(forceUpdate)));
         product = systemProperties.getProperty(Constants.PRODUCT, product);
@@ -256,6 +276,28 @@ public abstract class AgentMojo extends WhitesourceMojo {
                 ignoredScopes[i++] = ignoredScope;
             }
         }
+    }
+
+    private String readOrgTokenFile() {
+        String orgTokenToReturn = null;
+        if (StringUtils.isNotEmpty(orgTokenFile)) {
+            BufferedReader bufferedReader = null;
+            try {
+                bufferedReader = new BufferedReader(new FileReader(orgTokenFile));
+                orgTokenToReturn = bufferedReader.readLine();
+            } catch (IOException e) {
+                warn("Failed to read the org token from the file " + orgTokenFile + ", using the orgToken parameter instead.");
+            } finally {
+                try {
+                    if (bufferedReader != null) {
+                        bufferedReader.close();
+                    }
+                } catch (IOException ex) {
+                    warn("Failed to close the file " + orgTokenFile + ".");
+                }
+            }
+        }
+        return orgTokenToReturn;
     }
 
     private DependencyInfo getDependencyInfo(AetherDependencyNode dependencyNode) {

@@ -92,7 +92,7 @@ public class UpdateMojo extends AgentMojo {
 
     /* --- Private methods --- */
 
-    protected void init() {
+    protected void init() throws MojoFailureException {
         super.init();
         Properties systemProperties = session.getSystemProperties();
         checkPolicies = Boolean.parseBoolean(systemProperties.getProperty(Constants.CHECK_POLICIES, Boolean.toString(checkPolicies)));
@@ -144,7 +144,7 @@ public class UpdateMojo extends AgentMojo {
                     } catch (InterruptedException e1) {
                         // do nothing
                     }
-                        sendUpdate(projectInfos);
+                    sendUpdate(projectInfos);
                 } else {
                     throw new MojoExecutionException(Constants.ERROR_SERVICE_CONNECTION + Constants.ERROR_CONNECTION_REFUSED, e);
                 }

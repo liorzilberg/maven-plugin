@@ -72,7 +72,7 @@ public class CheckPoliciesMojo extends AgentMojo {
     }
 
     @Override
-    protected void init() {
+    protected void init() throws MojoFailureException {
         super.init();
     }
 

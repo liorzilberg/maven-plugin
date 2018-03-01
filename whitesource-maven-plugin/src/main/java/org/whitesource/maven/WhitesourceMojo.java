@@ -144,7 +144,7 @@ public abstract class WhitesourceMojo extends AbstractMojo {
 
     /* --- Protected methods --- */
 
-    protected void init() {
+    protected void init() throws MojoFailureException {
         Properties systemProperties = session.getSystemProperties();
         failOnError = Boolean.parseBoolean(systemProperties.getProperty(Constants.FAIL_ON_ERROR, Boolean.toString(failOnError)));
         autoDetectProxySettings = Boolean.parseBoolean(systemProperties.getProperty(
