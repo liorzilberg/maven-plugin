@@ -104,7 +104,7 @@ public class UpdateMojo extends AgentMojo {
             if (checkPolicies) {
                 info("Checking Policies");
                 CheckPolicyComplianceResult result = service.checkPolicyCompliance(
-                        orgToken, product, productVersion, projectInfos, forceCheckAllDependencies);
+                        orgToken, userKey, product, productVersion, projectInfos, forceCheckAllDependencies);
 
                 if (outputDirectory == null ||
                         (!outputDirectory.exists() && !outputDirectory.mkdirs())) {
@@ -131,7 +131,7 @@ public class UpdateMojo extends AgentMojo {
                 }
             } else {
                 info(SENDING_UPDATE);
-                updateResult = service.update(orgToken, requesterEmail, product, productVersion, projectInfos);
+                updateResult = service.update(orgToken,userKey, requesterEmail, product, productVersion, projectInfos);
                 logResult(updateResult);
             }
         } catch (WssServiceException e) {

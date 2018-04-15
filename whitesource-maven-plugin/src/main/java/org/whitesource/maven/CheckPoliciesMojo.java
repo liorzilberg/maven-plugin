@@ -82,7 +82,7 @@ public class CheckPoliciesMojo extends AgentMojo {
         try {
             info("Checking Policies");
             CheckPolicyComplianceResult result = service.checkPolicyCompliance(
-                    orgToken, product, productVersion, projectInfos, forceCheckAllDependencies);
+                    orgToken, userKey, product, productVersion, projectInfos, forceCheckAllDependencies);
 
             if (outputDirectory == null || (!outputDirectory.exists() && !outputDirectory.mkdirs())) {
                 warn("Output directory doesn't exist. Skipping policies check report.");

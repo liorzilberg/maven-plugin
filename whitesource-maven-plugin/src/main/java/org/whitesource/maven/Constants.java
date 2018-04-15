@@ -26,11 +26,12 @@ public final class Constants {
 
 	public static final String AGENT_TYPE = "maven-plugin";
 	public static final String AGENT_VERSION = "2.5.9";
-	public static final String PLUGIN_VERSION = "18.2.2</version>";
+	public static final String PLUGIN_VERSION = "18.3.1</version>";
 
 	public static final String PLUGIN_PREFIX = "org.whitesource.";
 	public static final String TIME_FORMAT = PLUGIN_PREFIX + "timeFormat";
 	public static final String ORG_TOKEN = PLUGIN_PREFIX + "orgToken";
+	public static final String USER_KEY = PLUGIN_PREFIX + "userKey";
 	public static final String PRODUCT = PLUGIN_PREFIX + "product";
 	public static final String PRODUCT_VERSION = PLUGIN_PREFIX + "productVersion";
 	public static final String CHECK_POLICIES = PLUGIN_PREFIX + "checkPolicies";
@@ -61,6 +62,7 @@ public final class Constants {
 	public static final String IGNORE_DEPENDENCY_RESOLUTION_ERRORS = PLUGIN_PREFIX + "ignoreDependencyResolutionErrors";
 	public static final String ENABLE_DEBUG = PLUGIN_PREFIX + "enableDebug";
 	public static final String ORG_TOKEN_FILE = PLUGIN_PREFIX + "orgTokenFile";
+    public static final String USER_KEY_FILE = PLUGIN_PREFIX + "userKeyFile";
 
 	/* --- Messages --- */
 

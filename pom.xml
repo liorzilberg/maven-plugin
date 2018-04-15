@@ -62,7 +62,7 @@
     </prerequisites>
 
     <properties>
-        <api.version>2.6.4</api.version>
+        <api.version>2.6.8-SNAPSHOT</api.version>
         <maven.version>3.0</maven.version>
         <maven.plugin.version>3.5</maven.plugin.version>
         <!--<maven.version>3.1.1</maven.version>-->
@@ -266,6 +266,7 @@
                     <version>18.3.1-SNAPSHOT</version>
                     <configuration>
                         <orgToken>token</orgToken>
+                        <userKey>key</userKey>
                     </configuration>
                 </plugin>
             </plugins>
