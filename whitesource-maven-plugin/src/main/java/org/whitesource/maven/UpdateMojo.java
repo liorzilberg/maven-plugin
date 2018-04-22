@@ -81,7 +81,7 @@ public class UpdateMojo extends AgentMojo {
 
         // Collect OSS usage information
         Collection<AgentProjectInfo> projectInfos = extractProjectInfos();
-
+        checkProjectInfos(projectInfos);
         // send to white source
         if (projectInfos == null || projectInfos.isEmpty()) {
             info("No open source information found.");
@@ -104,7 +104,7 @@ public class UpdateMojo extends AgentMojo {
             if (checkPolicies) {
                 info("Checking Policies");
                 CheckPolicyComplianceResult result = service.checkPolicyCompliance(
-                        orgToken, userKey, product, productVersion, projectInfos, forceCheckAllDependencies);
+                        orgToken, product, productVersion, projectInfos, forceCheckAllDependencies,userKey);
 
                 if (outputDirectory == null ||
                         (!outputDirectory.exists() && !outputDirectory.mkdirs())) {
@@ -131,7 +131,7 @@ public class UpdateMojo extends AgentMojo {
                 }
             } else {
                 info(SENDING_UPDATE);
-                updateResult = service.update(orgToken,userKey, requesterEmail, product, productVersion, projectInfos);
+                updateResult = service.update(orgToken, requesterEmail, product, productVersion, projectInfos,userKey);
                 logResult(updateResult);
             }
         } catch (WssServiceException e) {
@@ -192,6 +192,17 @@ public class UpdateMojo extends AgentMojo {
         } else {
             info("");
         }
+    }
+
+    private void checkProjectInfos(Collection<AgentProjectInfo> projectInfos) {
+      /*  Iterator<DependencyInfo> iterator = projectInfo.iterator();
+        while (iterator.hasNext()) {
+            DependencyInfo child = iterator.next();
+            children.add(child);
+            children.addAll(extractChildren(child));
+            // flatten dependencies
+            iterator.remove();
+        }*/
     }
 
 }
