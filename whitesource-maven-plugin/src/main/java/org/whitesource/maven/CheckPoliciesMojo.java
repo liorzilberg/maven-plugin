@@ -72,7 +72,7 @@ public class CheckPoliciesMojo extends AgentMojo {
     }
 
     @Override
-    protected void init() {
+    protected void init() throws MojoFailureException {
         super.init();
     }
 
@@ -82,7 +82,7 @@ public class CheckPoliciesMojo extends AgentMojo {
         try {
             info("Checking Policies");
             CheckPolicyComplianceResult result = service.checkPolicyCompliance(
-                    orgToken, product, productVersion, projectInfos, forceCheckAllDependencies);
+                    orgToken, product, productVersion, projectInfos, forceCheckAllDependencies,userKey);
 
             if (outputDirectory == null || (!outputDirectory.exists() && !outputDirectory.mkdirs())) {
                 warn("Output directory doesn't exist. Skipping policies check report.");
@@ -102,7 +102,7 @@ public class CheckPoliciesMojo extends AgentMojo {
                 if (connectionRetries-- > 0) {
                     info(Constants.ATTEMPTING_TO_RECONNECT_MESSAGE);
                     try {
-                        Thread.sleep(DEFAULT_CONNECTION_DELAY_TIME);
+                        Thread.sleep(connectionRetryInterval);
                     } catch (InterruptedException e1) {
                         // do nothing
                     }

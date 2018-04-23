@@ -2,16 +2,19 @@ package org.whitesource.maven;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.DependencyResolutionException;
 import org.apache.maven.project.MavenProject;
+import org.whitesource.agent.hash.ChecksumUtils;
 import org.whitesource.agent.api.dispatch.BaseCheckPoliciesResult;
 import org.whitesource.agent.api.model.*;
-import org.whitesource.agent.hash.ChecksumUtils;
 import org.whitesource.agent.report.PolicyCheckReport;
 import org.whitesource.maven.utils.dependencies.*;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
@@ -42,8 +45,14 @@ public abstract class AgentMojo extends WhitesourceMojo {
     /**
      * Unique identifier of the organization to update.
      */
-    @Parameter(alias = "orgToken", property = Constants.ORG_TOKEN, required = true)
+    @Parameter(alias = "orgToken", property = Constants.ORG_TOKEN, required = false)
     protected String orgToken;
+
+    /**
+     * Unique identifier of the user to update.
+     */
+    @Parameter(alias = "userKey", property = Constants.USER_KEY, required = false)
+    protected String userKey;
 
     /**
      * Optional. Updates organization inventory regardless of policy violations.
@@ -54,10 +63,10 @@ public abstract class AgentMojo extends WhitesourceMojo {
     /**
      * Optional. Set to true to force check policies for all dependencies.
      * If set to false policies will be checked only for new dependencies introduced to the WhiteSource projects.
-     *
+     * <p>
      * Important: Only used if {@link UpdateMojo#checkPolicies} is set to true.
      */
-    @Parameter( alias = "forceCheckAllDependencies", property = Constants.FORCE_CHECK_ALL_DEPENDENCIES, required = false, defaultValue = "false")
+    @Parameter(alias = "forceCheckAllDependencies", property = Constants.FORCE_CHECK_ALL_DEPENDENCIES, required = false, defaultValue = "false")
     protected boolean forceCheckAllDependencies;
 
     /**
@@ -75,7 +84,7 @@ public abstract class AgentMojo extends WhitesourceMojo {
     /**
      * Output directory for checking policies results.
      */
-    @Parameter( alias = "outputDirectory", property = Constants.OUTPUT_DIRECTORY, required = false, defaultValue = "${project.reporting.outputDirectory}")
+    @Parameter(alias = "outputDirectory", property = Constants.OUTPUT_DIRECTORY, required = false, defaultValue = "${project.reporting.outputDirectory}")
     protected File outputDirectory;
 
     /**
@@ -174,6 +183,18 @@ public abstract class AgentMojo extends WhitesourceMojo {
     @Parameter(alias = "ignoreDependencyResolutionErrors", property = Constants.IGNORE_DEPENDENCY_RESOLUTION_ERRORS, required = false, defaultValue = "false")
     protected boolean ignoreDependencyResolutionErrors;
 
+    /**
+     * Optional. Path to file that contains the org token.
+     */
+    @Parameter(alias = "orgTokenFile", property = Constants.ORG_TOKEN_FILE, required = false)
+    protected String orgTokenFile;
+
+    /**
+     * Optional. Path to file that contains the user key.
+     */
+    @Parameter(alias = "userKeyFile", property = Constants.ORG_TOKEN_FILE, required = false)
+    protected String userKeyFile;
+
     /* --- Constructors --- */
 
     protected AgentMojo() {
@@ -181,7 +202,7 @@ public abstract class AgentMojo extends WhitesourceMojo {
 
     /* --- Protected methods --- */
 
-    protected void init() {
+    protected void init() throws MojoFailureException {
         super.init();
 
         // copy token for modules with special names into moduleTokens.
@@ -205,12 +226,37 @@ public abstract class AgentMojo extends WhitesourceMojo {
 
         // initialize time format
         timeFormat = systemProperties.getProperty(Constants.TIME_FORMAT, timeFormat);
-        if(timeFormat == null){
+        if (timeFormat == null) {
             timeFormat = Constants.DEFAULT_TIME_FORMAT;
         }
         dateFormat = new SimpleDateFormat(timeFormat);
 
-        orgToken = systemProperties.getProperty(Constants.ORG_TOKEN, orgToken);
+        // read org token from dedicated file
+        orgTokenFile = systemProperties.getProperty(Constants.ORG_TOKEN_FILE, orgTokenFile);
+        String orgTokenFromFile = readOrgTokenFile(orgTokenFile);
+        if (StringUtils.isNotEmpty(orgTokenFromFile)) {
+            orgToken = orgTokenFromFile;
+        } else {
+            orgToken = systemProperties.getProperty(Constants.ORG_TOKEN, orgToken);
+        }
+        if (StringUtils.isEmpty(orgToken)) {
+            throw new MojoFailureException("The parameter 'orgToken' is missing or invalid");
+        }
+
+        // read userKey from dedicated file
+        userKeyFile = systemProperties.getProperty(Constants.USER_KEY_FILE, userKeyFile);
+        String userKeyFromFile = readOrgTokenFile(userKeyFile);
+        if (StringUtils.isNotEmpty(userKeyFromFile)) {
+            userKey = userKeyFromFile;
+        } else {
+            userKey = systemProperties.getProperty(Constants.USER_KEY, userKey);
+        }
+        if (StringUtils.isEmpty(userKey)) {
+            throw new MojoFailureException("The parameter 'userKey' is missing or invalid");
+        }
+
+
+        // get token from
         ignorePomModules = Boolean.parseBoolean(systemProperties.getProperty(Constants.IGNORE_POM_MODULES, Boolean.toString(ignorePomModules)));
         forceUpdate = Boolean.parseBoolean(systemProperties.getProperty(Constants.FORCE_UPDATE, Boolean.toString(forceUpdate)));
         product = systemProperties.getProperty(Constants.PRODUCT, product);
@@ -256,6 +302,29 @@ public abstract class AgentMojo extends WhitesourceMojo {
                 ignoredScopes[i++] = ignoredScope;
             }
         }
+    }
+
+    // read orgTokenFile or userKeyFile
+    private String readOrgTokenFile(String keyFile) {
+        String orgTokenToReturn = null;
+        if (StringUtils.isNotEmpty(keyFile)) {
+            BufferedReader bufferedReader = null;
+            try {
+                bufferedReader = new BufferedReader(new FileReader(keyFile));
+                orgTokenToReturn = bufferedReader.readLine();
+            } catch (IOException e) {
+                warn("Failed to read the org token from the file " + keyFile + ", using the orgToken parameter instead.");
+            } finally {
+                try {
+                    if (bufferedReader != null) {
+                        bufferedReader.close();
+                    }
+                } catch (IOException ex) {
+                    warn("Failed to close the file " + keyFile + ".");
+                }
+            }
+        }
+        return orgTokenToReturn;
     }
 
     private DependencyInfo getDependencyInfo(AetherDependencyNode dependencyNode) {
@@ -347,7 +416,7 @@ public abstract class AgentMojo extends WhitesourceMojo {
 
         // collect dependencies
         try {
-           projectInfo.getDependencies().addAll(collectDependencyStructure(project));
+            projectInfo.getDependencies().addAll(collectDependencyStructure(project));
         } catch (DependencyResolutionException e) {
             if (ignoreDependencyResolutionErrors) {
                 warn("Skipping project " + project.getArtifactId() + ", error resolving dependencies (ignoreDependencyResolutionErrors=true)");
@@ -372,9 +441,7 @@ public abstract class AgentMojo extends WhitesourceMojo {
      * By default resolves filters scopes test and provided, and transitive optional dependencies.
      *
      * @param project The maven project.
-     *
      * @return A collection of {@link DependencyInfo} resolved with children.
-     *
      * @throws DependencyResolutionException Exception thrown if dependency resolution fails.
      */
     protected Collection<DependencyInfo> collectDependencyStructure(MavenProject project) throws DependencyResolutionException {
@@ -411,12 +478,14 @@ public abstract class AgentMojo extends WhitesourceMojo {
     }
 
     protected boolean matchAny(String value, String[] patterns) {
-        if (value == null) { return false; }
+        if (value == null) {
+            return false;
+        }
 
         boolean match = false;
-        for (int i=0; i < patterns.length && !match; i++) {
+        for (int i = 0; i < patterns.length && !match; i++) {
             String pattern = patterns[i];
-            if (pattern != null)  {
+            if (pattern != null) {
                 String regex = pattern.replace(".", "\\.").replace("*", ".*");
                 match = value.matches(regex);
             }
@@ -478,7 +547,9 @@ public abstract class AgentMojo extends WhitesourceMojo {
     }
 
     protected boolean shouldProcess(MavenProject project) {
-        if (project == null) { return false; }
+        if (project == null) {
+            return false;
+        }
 
         boolean process = true;
         if (ignorePomModules && POM.equals(project.getPackaging())) {

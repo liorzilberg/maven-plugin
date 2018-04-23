@@ -21,6 +21,7 @@ import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugin.logging.Log;
+import org.apache.maven.plugin.logging.SystemStreamLog;
 import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.DependencyResolutionException;
@@ -48,11 +49,13 @@ public abstract class WhitesourceMojo extends AbstractMojo {
 
     private static final String DEFAULT_CONNECTION_TIMEOUT_MINUTES = "60";
     private static final String DEFAULT_CONNECTION_RETRIES = "1";
-    protected static final Integer DEFAULT_CONNECTION_DELAY_TIME = 3000;
+    private static final String DEFAULT_CONNECTION_RETRY_INTERVAL = "3000";
+    private static final String DEFAULT_CONNECTION_IGNORE_CERTIFICATE_CHECK = "false";
+    private static final String DEFAULT_ENABLE_DEBUG = "false";
 
     /* --- Members --- */
 
-    private final Log log = getLog();
+    private Log log;
     protected DateFormat dateFormat = new SimpleDateFormat(Constants.DEFAULT_TIME_FORMAT);
 
     /**
@@ -91,8 +94,17 @@ public abstract class WhitesourceMojo extends AbstractMojo {
     @Parameter(alias = "connectionRetries", property = Constants.CONNECTION_RETRIES, required = false, defaultValue = DEFAULT_CONNECTION_RETRIES)
     protected int connectionRetries;
 
+    @Parameter(alias = "connectionRetryInterval", property = Constants.CONNECTION_RETRY_INTERVAL, required = false, defaultValue = DEFAULT_CONNECTION_RETRY_INTERVAL)
+    protected int connectionRetryInterval;
+
+    @Parameter(alias = "ignoreCertificateCheck", property = Constants.CONNECTION_IGNORE_CERTIFICATE_CHECK, required = false, defaultValue = DEFAULT_CONNECTION_IGNORE_CERTIFICATE_CHECK)
+    protected boolean ignoreCertificateCheck;
+
     @Parameter(alias = "connectionTimeoutMinutes", property = ClientConstants.CONNECTION_TIMEOUT_KEYWORD, required = false, defaultValue = DEFAULT_CONNECTION_TIMEOUT_MINUTES)
     protected int connectionTimeoutMinutes;
+
+    @Parameter(alias = "enableDebug", property = Constants.ENABLE_DEBUG, required = false, defaultValue = DEFAULT_ENABLE_DEBUG)
+    protected boolean enableDebug;
 
     protected WhitesourceService service;
 
@@ -132,7 +144,7 @@ public abstract class WhitesourceMojo extends AbstractMojo {
 
     /* --- Protected methods --- */
 
-    protected void init() {
+    protected void init() throws MojoFailureException {
         Properties systemProperties = session.getSystemProperties();
         failOnError = Boolean.parseBoolean(systemProperties.getProperty(Constants.FAIL_ON_ERROR, Boolean.toString(failOnError)));
         autoDetectProxySettings = Boolean.parseBoolean(systemProperties.getProperty(
@@ -141,6 +153,21 @@ public abstract class WhitesourceMojo extends AbstractMojo {
                 ClientConstants.CONNECTION_TIMEOUT_KEYWORD, String.valueOf(connectionTimeoutMinutes)));
         failOnConnectionError = Boolean.parseBoolean(systemProperties.getProperty(Constants.FAIL_ON_CONNECTION_ERROR, Boolean.toString(failOnConnectionError)));
         connectionRetries = Integer.parseInt(systemProperties.getProperty(Constants.CONNECTION_RETRIES, String.valueOf(connectionRetries)));
+        connectionRetryInterval = Integer.parseInt(systemProperties.getProperty(Constants.CONNECTION_RETRY_INTERVAL, String.valueOf(connectionRetryInterval)));
+        ignoreCertificateCheck = Boolean.parseBoolean(systemProperties.getProperty(Constants.CONNECTION_IGNORE_CERTIFICATE_CHECK, String.valueOf(ignoreCertificateCheck)));
+        enableDebug = Boolean.parseBoolean(systemProperties.getProperty(Constants.ENABLE_DEBUG, String.valueOf(enableDebug)));
+
+        if (enableDebug) {
+            log = new SystemStreamLog() {
+                @Override
+                public boolean isDebugEnabled() {
+                    return enableDebug;
+                }
+            };
+            setLog(log);
+        } else {
+            log = getLog();
+        }
     }
 
     protected void createService() {
@@ -151,7 +178,7 @@ public abstract class WhitesourceMojo extends AbstractMojo {
         info("Service URL is " + serviceUrl);
 
         service = new WhitesourceService(Constants.AGENT_TYPE, Constants.AGENT_VERSION, Constants.PLUGIN_VERSION,
-                serviceUrl, autoDetectProxySettings, connectionTimeoutMinutes);
+                serviceUrl, autoDetectProxySettings, connectionTimeoutMinutes, ignoreCertificateCheck);
         if (service == null) {
             info("Failed to initiate WhiteSource Service");
         } else {
@@ -198,7 +225,7 @@ public abstract class WhitesourceMojo extends AbstractMojo {
     }
 
     protected void debug(CharSequence content) {
-        if (log != null) {
+        if (log != null && log.isDebugEnabled()) {
             log.debug(getFormattedContent(content));
         }
     }

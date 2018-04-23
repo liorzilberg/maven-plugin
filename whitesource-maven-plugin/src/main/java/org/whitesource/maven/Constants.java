@@ -25,12 +25,13 @@ public final class Constants {
 	/* --- Configuration --- */
 
 	public static final String AGENT_TYPE = "maven-plugin";
-	public static final String AGENT_VERSION = "2.3.7";
-	public static final String PLUGIN_VERSION = "17.11.3";
+	public static final String AGENT_VERSION = "2.6.4";
+	public static final String PLUGIN_VERSION = "18.3.2";
 
 	public static final String PLUGIN_PREFIX = "org.whitesource.";
 	public static final String TIME_FORMAT = PLUGIN_PREFIX + "timeFormat";
 	public static final String ORG_TOKEN = PLUGIN_PREFIX + "orgToken";
+	public static final String USER_KEY = PLUGIN_PREFIX + "userKey";
 	public static final String PRODUCT = PLUGIN_PREFIX + "product";
 	public static final String PRODUCT_VERSION = PLUGIN_PREFIX + "productVersion";
 	public static final String CHECK_POLICIES = PLUGIN_PREFIX + "checkPolicies";
@@ -55,8 +56,13 @@ public final class Constants {
 	public static final String ALTERNATIVE_SERVICE_URL_KEYWORD = PLUGIN_PREFIX + "wssUrl";
 	public static final String FAIL_ON_CONNECTION_ERROR = PLUGIN_PREFIX + "failOnConnectionError";
 	public static final String CONNECTION_RETRIES = PLUGIN_PREFIX + "connectionRetries";
+	public static final String CONNECTION_RETRY_INTERVAL = PLUGIN_PREFIX + "connectionRetryInterval";
+	public static final String CONNECTION_IGNORE_CERTIFICATE_CHECK = PLUGIN_PREFIX + "ignoreCertificateCheck";
 	public static final String AUTO_DETECT_PROXY_SETTINGS = PLUGIN_PREFIX + "autoDetectProxySettings";
 	public static final String IGNORE_DEPENDENCY_RESOLUTION_ERRORS = PLUGIN_PREFIX + "ignoreDependencyResolutionErrors";
+	public static final String ENABLE_DEBUG = PLUGIN_PREFIX + "enableDebug";
+	public static final String ORG_TOKEN_FILE = PLUGIN_PREFIX + "orgTokenFile";
+    public static final String USER_KEY_FILE = PLUGIN_PREFIX + "userKeyFile";
 
 	/* --- Messages --- */
 
