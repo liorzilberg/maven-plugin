@@ -1,12 +1,12 @@
 /**
  * Copyright (C) 2011 White Source Ltd.
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -28,7 +28,9 @@ import org.whitesource.agent.api.dispatch.UpdateInventoryResult;
 import org.whitesource.agent.api.model.AgentProjectInfo;
 import org.whitesource.agent.client.WssServiceException;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.Properties;
 
 /**
@@ -44,7 +46,7 @@ import java.util.Properties;
 @Mojo(name = "update",
         defaultPhase = LifecyclePhase.PACKAGE,
         requiresDependencyResolution = ResolutionScope.TEST,
-        aggregator = true )
+        aggregator = true)
 public class UpdateMojo extends AgentMojo {
 
     /* --- Static members --- */
@@ -59,7 +61,7 @@ public class UpdateMojo extends AgentMojo {
     /**
      * Optional. Set to true to check policies.
      */
-    @Parameter( alias = "checkPolicies", property = Constants.CHECK_POLICIES, required = false, defaultValue = "false")
+    @Parameter(alias = "checkPolicies", property = Constants.CHECK_POLICIES, required = false, defaultValue = "false")
     private boolean checkPolicies;
 
     /* --- Constructors --- */
@@ -81,9 +83,9 @@ public class UpdateMojo extends AgentMojo {
 
         // Collect OSS usage information
         Collection<AgentProjectInfo> projectInfos = extractProjectInfos();
-        checkProjectInfos(projectInfos);
+        removeEmptyProjects(projectInfos);
         // send to white source
-        if (projectInfos == null || projectInfos.isEmpty()) {
+        if (projectInfos.isEmpty()) {
             info("No open source information found.");
         } else {
             sendUpdate(projectInfos);
@@ -104,7 +106,7 @@ public class UpdateMojo extends AgentMojo {
             if (checkPolicies) {
                 info("Checking Policies");
                 CheckPolicyComplianceResult result = service.checkPolicyCompliance(
-                        orgToken, product, productVersion, projectInfos, forceCheckAllDependencies,userKey);
+                        orgToken, product, productVersion, projectInfos, forceCheckAllDependencies, userKey);
 
                 if (outputDirectory == null ||
                         (!outputDirectory.exists() && !outputDirectory.mkdirs())) {
@@ -131,7 +133,7 @@ public class UpdateMojo extends AgentMojo {
                 }
             } else {
                 info(SENDING_UPDATE);
-                updateResult = service.update(orgToken, requesterEmail, product, productVersion, projectInfos,userKey);
+                updateResult = service.update(orgToken, requesterEmail, product, productVersion, projectInfos, userKey);
                 logResult(updateResult);
             }
         } catch (WssServiceException e) {
@@ -163,7 +165,7 @@ public class UpdateMojo extends AgentMojo {
         // newly created projects
         Collection<String> createdProjects = result.getCreatedProjects();
         if (createdProjects.isEmpty()) {
-//            info("No new projects found.");
+            //            info("No new projects found.");
         } else {
             info("");
             info("Newly Created Projects:");
@@ -175,7 +177,7 @@ public class UpdateMojo extends AgentMojo {
         // updated projects
         Collection<String> updatedProjects = result.getUpdatedProjects();
         if (updatedProjects.isEmpty()) {
-//            info("No projects were updated.");
+            //            info("No projects were updated.");
         } else {
             info("");
             info("Updated Projects:");
@@ -194,15 +196,15 @@ public class UpdateMojo extends AgentMojo {
         }
     }
 
-    private void checkProjectInfos(Collection<AgentProjectInfo> projectInfos) {
-      /*  Iterator<DependencyInfo> iterator = projectInfo.iterator();
+    private void removeEmptyProjects(Collection<AgentProjectInfo> projectInfos) {
+        Collection<AgentProjectInfo> emptyProjects = new ArrayList<AgentProjectInfo>();
+        Iterator<AgentProjectInfo> iterator = projectInfos.iterator();
         while (iterator.hasNext()) {
-            DependencyInfo child = iterator.next();
-            children.add(child);
-            children.addAll(extractChildren(child));
-            // flatten dependencies
-            iterator.remove();
-        }*/
+            AgentProjectInfo child = iterator.next();
+            if (child.getDependencies().size() == 0) {
+                emptyProjects.add(child);
+            }
+        }
+        projectInfos.removeAll(emptyProjects);
     }
-
 }
