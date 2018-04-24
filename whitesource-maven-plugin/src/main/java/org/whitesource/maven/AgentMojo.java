@@ -251,10 +251,6 @@ public abstract class AgentMojo extends WhitesourceMojo {
         } else {
             userKey = systemProperties.getProperty(Constants.USER_KEY, userKey);
         }
-        if (StringUtils.isEmpty(userKey)) {
-            throw new MojoFailureException("The parameter 'userKey' is missing or invalid");
-        }
-
 
         // get token from
         ignorePomModules = Boolean.parseBoolean(systemProperties.getProperty(Constants.IGNORE_POM_MODULES, Boolean.toString(ignorePomModules)));
