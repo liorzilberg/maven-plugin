@@ -9,7 +9,7 @@
 
     <groupId>org.whitesource</groupId>
     <artifactId>whitesource-maven-parent</artifactId>
-    <version>18.4.1-SNAPSHOT</version>
+    <version>18.4.2-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <modules>
@@ -263,7 +263,7 @@
                 <plugin>
                     <groupId>org.whitesource</groupId>
                     <artifactId>whitesource-maven-plugin</artifactId>
-                    <version>18.4.1-SNAPSHOT</version>
+                    <version>18.4.2-SNAPSHOT</version>
                     <configuration>
                         <orgToken>token</orgToken>
                         <userKey>key</userKey>
