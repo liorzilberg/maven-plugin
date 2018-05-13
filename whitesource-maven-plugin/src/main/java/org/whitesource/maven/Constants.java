@@ -25,8 +25,8 @@ public final class Constants {
 	/* --- Configuration --- */
 
 	public static final String AGENT_TYPE = "maven-plugin";
-	public static final String AGENT_VERSION = "2.6.4";
-	public static final String PLUGIN_VERSION = "18.3.2";
+	public static final String AGENT_VERSION = "2.6.8";
+	public static final String PLUGIN_VERSION = "18.4.2";
 
 	public static final String PLUGIN_PREFIX = "org.whitesource.";
 	public static final String TIME_FORMAT = PLUGIN_PREFIX + "timeFormat";
