@@ -157,6 +157,9 @@ public abstract class AgentMojo extends WhitesourceMojo {
     @Parameter(alias = "aggregateModules", property = Constants.AGGREGATE_MODULES, required = false, defaultValue = "false")
     protected boolean aggregateModules;
 
+    @Parameter(alias = "preserveModuleInfo", property = Constants.PRESERVE_MODULE_INFO, required = false, defaultValue = "false")
+    protected boolean preserveModuleInfo;
+
     /**
      * Optional. The aggregated project name that will appear in WhiteSource.
      * If omitted and no project token defined, defaults to pom artifactId.
@@ -268,6 +271,7 @@ public abstract class AgentMojo extends WhitesourceMojo {
         aggregateModules = Boolean.parseBoolean(systemProperties.getProperty(Constants.AGGREGATE_MODULES, Boolean.toString(aggregateModules)));
         aggregateProjectName = systemProperties.getProperty(Constants.AGGREGATE_MODULES_PROJECT_NAME, aggregateProjectName);
         aggregateProjectToken = systemProperties.getProperty(Constants.AGGREGATE_MODULES_PROJECT_TOKEN, aggregateProjectToken);
+        preserveModuleInfo = Boolean.parseBoolean((systemProperties.getProperty(Constants.PRESERVE_MODULE_INFO, Boolean.toString(preserveModuleInfo))));
 
         // ignored scopes
         Set<String> ignoredScopeSet = new HashSet<String>();
@@ -390,9 +394,7 @@ public abstract class AgentMojo extends WhitesourceMojo {
 
     protected AgentProjectInfo processProject(MavenProject project) throws MojoExecutionException, DependencyResolutionException {
         long startTime = System.currentTimeMillis();
-
         info("Processing " + project.getId());
-
         AgentProjectInfo projectInfo = new AgentProjectInfo();
 
         // project token
@@ -501,25 +503,37 @@ public abstract class AgentMojo extends WhitesourceMojo {
         }
         debugProjectInfos(projectInfos);
 
-        // combine all pom modules into a single project
         if (aggregateModules) {
-            // collect dependencies as flat list
-            Set<DependencyInfo> flatDependencies = new HashSet<DependencyInfo>();
-            for (AgentProjectInfo projectInfo : projectInfos) {
-                for (DependencyInfo dependency : projectInfo.getDependencies()) {
-                    flatDependencies.add(dependency);
-                    flatDependencies.addAll(extractChildren(dependency));
+            // create combined project
+            AgentProjectInfo aggregatingProject = new AgentProjectInfo();
+            aggregatingProject.setCoordinates(extractCoordinates(mavenProject));
+            aggregatingProject.setProjectToken(aggregateProjectToken);
+
+            // combine all pom modules into a single project
+            if (!preserveModuleInfo) {
+                Set<DependencyInfo> flatDependencies = new HashSet<DependencyInfo>();
+                // collect dependencies as flat list
+                for (AgentProjectInfo projectInfo : projectInfos) {
+                    for (DependencyInfo dependency : projectInfo.getDependencies()) {
+                        flatDependencies.add(dependency);
+                        flatDependencies.addAll(extractChildren(dependency));
+                    }
+                }
+                aggregatingProject.getDependencies().addAll(flatDependencies);
+            } else {
+                // combine all pom modules to be dependencies of single project, each module will be represented as a parent of its dependencies
+                for (AgentProjectInfo projectInfo : projectInfos) {
+                    DependencyInfo dependencyInfo = new DependencyInfo(projectInfo.getCoordinates().getGroupId(),
+                            projectInfo.getCoordinates().getArtifactId(), projectInfo.getCoordinates().getVersion());
+                    dependencyInfo.setVirtualDependency(true);
+                    dependencyInfo.setChildren(projectInfo.getDependencies());
+                    aggregatingProject.getDependencies().add(dependencyInfo);
                 }
             }
 
             // clear all projects
             projectInfos.clear();
 
-            // create combined project
-            AgentProjectInfo aggregatingProject = new AgentProjectInfo();
-            aggregatingProject.setCoordinates(extractCoordinates(mavenProject));
-            aggregatingProject.setProjectToken(aggregateProjectToken);
-            aggregatingProject.getDependencies().addAll(flatDependencies);
             // override artifact id with project name
             if (StringUtils.isNotBlank(aggregateProjectName)) {
                 aggregatingProject.getCoordinates().setArtifactId(aggregateProjectName);
