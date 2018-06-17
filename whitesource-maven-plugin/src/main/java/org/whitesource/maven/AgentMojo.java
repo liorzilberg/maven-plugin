@@ -33,6 +33,7 @@ public abstract class AgentMojo extends WhitesourceMojo {
     private static final String SCOPE_TEST = "test";
     private static final String SCOPE_PROVIDED = "provided";
     private static final String FILENAME_PATTERN = "{0}-{1}.{2}";
+    public static final String DASH = "-";
 
     /* --- Members --- */
 
@@ -505,48 +506,9 @@ public abstract class AgentMojo extends WhitesourceMojo {
             }
         }
         debugProjectInfos(projectInfos);
-
-    /*    if (aggregateModules) {
-            // create combined project
-            AgentProjectInfo aggregatingProject = new AgentProjectInfo();
-            aggregatingProject.setCoordinates(extractCoordinates(mavenProject));
-            aggregatingProject.setProjectToken(aggregateProjectToken);
-
-            // combine all pom modules into a single project
-            Set<DependencyInfo> flatDependencies = new HashSet<DependencyInfo>();
-            // collect dependencies as flat list
-            for (AgentProjectInfo projectInfo : projectInfos) {
-                for (DependencyInfo dependency : projectInfo.getDependencies()) {
-                    flatDependencies.add(dependency);
-                    flatDependencies.addAll(extractChildren(dependency));
-                }
-            }
-            aggregatingProject.getDependencies().addAll(flatDependencies);
-            if (preserveModuleInfo) {
-                // combine all pom modules to be dependencies of single project, each module will be represented as a parent of its dependencies
-                for (AgentProjectInfo projectInfo : projectInfos) {
-                    BaseNode baseNode = new ModuleNode(projectInfo.getCoordinates().getGroupId(),
-                            projectInfo.getCoordinates().getArtifactId(), projectInfo.getCoordinates().getVersion(), NodeType.MODULE);
-                    Collection<BaseNode> baseDependencies = dependencyInfosToBaseDependnecies(projectInfo.getDependencies());
-                   *//* BaseDependency baseDependency = new ModuleDependency(projectInfo.getCoordinates().getGroupId(),
-                            projectInfo.getCoordinates().getArtifactId(), projectInfo.getCoordinates().getVersion());
-                    Collection<BaseDependency> baseDependencies = dependencyInfosToBaseDependnecies(projectInfo.getDependencies());
-                    if (!baseDependencies.isEmpty()) {
-                        baseDependency.setChildren(dependencyInfosToBaseDependnecies(projectInfo.getDependencies()));
-                    }
-                    aggregatingProject.getBaseDependencies().add(baseDependency);*//*
-                }
-            }
-
-            // clear all projects
-            projectInfos.clear();
-
-            // override artifact id with project name
-            if (StringUtils.isNotBlank(aggregateProjectName)) {
-                aggregatingProject.getCoordinates().setArtifactId(aggregateProjectName);
-            }
-            projectInfos.add(aggregatingProject);
-        }*/
+        if (StringUtils.isBlank(aggregateProjectName)) {
+            aggregateProjectName = mavenProject.getArtifactId() + DASH + mavenProject.getVersion();
+        }
         return projectInfos;
     }
 
