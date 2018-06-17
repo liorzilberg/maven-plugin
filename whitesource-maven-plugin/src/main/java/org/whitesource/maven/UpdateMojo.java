@@ -35,10 +35,10 @@ import java.util.Properties;
 
 /**
  * Send updates of open source software usage information to White Source.
- *
  * <p>
- *     Further documentation for the plugin and its usage can be found in the
- *     <a href="http://docs.whitesourcesoftware.com/display/serviceDocs/Maven+plugin">online documentation</a>.
+ * <p>
+ * Further documentation for the plugin and its usage can be found in the
+ * <a href="http://docs.whitesourcesoftware.com/display/serviceDocs/Maven+plugin">online documentation</a>.
  * </p>
  *
  * @author Edo.Shor
@@ -106,7 +106,7 @@ public class UpdateMojo extends AgentMojo {
             if (checkPolicies) {
                 info("Checking Policies");
                 CheckPolicyComplianceResult result = service.checkPolicyCompliance(
-                        orgToken, product, productVersion, projectInfos, forceCheckAllDependencies, userKey);
+                        orgToken, product, productVersion, projectInfos, forceCheckAllDependencies, userKey, requesterEmail, aggregateModules, preserveModuleInfo, aggregateProjectName, aggregateProjectToken);
 
                 if (outputDirectory == null ||
                         (!outputDirectory.exists() && !outputDirectory.mkdirs())) {
@@ -122,7 +122,7 @@ public class UpdateMojo extends AgentMojo {
 
                 if (!hasRejections || forceUpdate) {
                     info(forceUpdate ? SENDING_FORCE_UPDATE : SENDING_UPDATE);
-                    updateResult = service.update(orgToken, requesterEmail, product, productVersion, projectInfos);
+                    updateResult = service.update(orgToken, requesterEmail, product, productVersion, projectInfos, userKey, aggregateModules, preserveModuleInfo, aggregateProjectName, aggregateProjectToken);
                     logResult(updateResult);
                 }
 

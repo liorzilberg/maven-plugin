@@ -62,7 +62,7 @@
     </prerequisites>
 
     <properties>
-        <api.version>2.7.1</api.version>
+        <api.version>2.7.3-SNAPSHOT</api.version>
         <maven.version>3.0</maven.version>
         <maven.plugin.version>3.5</maven.plugin.version>
         <!--<maven.version>3.1.1</maven.version>-->

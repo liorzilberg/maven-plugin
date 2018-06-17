@@ -6,9 +6,9 @@ import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.DependencyResolutionException;
 import org.apache.maven.project.MavenProject;
-import org.whitesource.agent.hash.ChecksumUtils;
 import org.whitesource.agent.api.dispatch.BaseCheckPoliciesResult;
 import org.whitesource.agent.api.model.*;
+import org.whitesource.agent.hash.ChecksumUtils;
 import org.whitesource.agent.report.PolicyCheckReport;
 import org.whitesource.maven.utils.dependencies.*;
 
@@ -157,6 +157,9 @@ public abstract class AgentMojo extends WhitesourceMojo {
     @Parameter(alias = "aggregateModules", property = Constants.AGGREGATE_MODULES, required = false, defaultValue = "false")
     protected boolean aggregateModules;
 
+    /**
+     * Optional. Set to true to combine all pom modules to be dependencies of single project, each module will be represented as a parent of its dependencies
+     */
     @Parameter(alias = "preserveModuleInfo", property = Constants.PRESERVE_MODULE_INFO, required = false, defaultValue = "false")
     protected boolean preserveModuleInfo;
 
@@ -503,31 +506,35 @@ public abstract class AgentMojo extends WhitesourceMojo {
         }
         debugProjectInfos(projectInfos);
 
-        if (aggregateModules) {
+    /*    if (aggregateModules) {
             // create combined project
             AgentProjectInfo aggregatingProject = new AgentProjectInfo();
             aggregatingProject.setCoordinates(extractCoordinates(mavenProject));
             aggregatingProject.setProjectToken(aggregateProjectToken);
 
             // combine all pom modules into a single project
-            if (!preserveModuleInfo) {
-                Set<DependencyInfo> flatDependencies = new HashSet<DependencyInfo>();
-                // collect dependencies as flat list
-                for (AgentProjectInfo projectInfo : projectInfos) {
-                    for (DependencyInfo dependency : projectInfo.getDependencies()) {
-                        flatDependencies.add(dependency);
-                        flatDependencies.addAll(extractChildren(dependency));
-                    }
+            Set<DependencyInfo> flatDependencies = new HashSet<DependencyInfo>();
+            // collect dependencies as flat list
+            for (AgentProjectInfo projectInfo : projectInfos) {
+                for (DependencyInfo dependency : projectInfo.getDependencies()) {
+                    flatDependencies.add(dependency);
+                    flatDependencies.addAll(extractChildren(dependency));
                 }
-                aggregatingProject.getDependencies().addAll(flatDependencies);
-            } else {
+            }
+            aggregatingProject.getDependencies().addAll(flatDependencies);
+            if (preserveModuleInfo) {
                 // combine all pom modules to be dependencies of single project, each module will be represented as a parent of its dependencies
                 for (AgentProjectInfo projectInfo : projectInfos) {
-                    DependencyInfo dependencyInfo = new DependencyInfo(projectInfo.getCoordinates().getGroupId(),
+                    BaseNode baseNode = new ModuleNode(projectInfo.getCoordinates().getGroupId(),
+                            projectInfo.getCoordinates().getArtifactId(), projectInfo.getCoordinates().getVersion(), NodeType.MODULE);
+                    Collection<BaseNode> baseDependencies = dependencyInfosToBaseDependnecies(projectInfo.getDependencies());
+                   *//* BaseDependency baseDependency = new ModuleDependency(projectInfo.getCoordinates().getGroupId(),
                             projectInfo.getCoordinates().getArtifactId(), projectInfo.getCoordinates().getVersion());
-                    dependencyInfo.setVirtualDependency(true);
-                    dependencyInfo.setChildren(projectInfo.getDependencies());
-                    aggregatingProject.getDependencies().add(dependencyInfo);
+                    Collection<BaseDependency> baseDependencies = dependencyInfosToBaseDependnecies(projectInfo.getDependencies());
+                    if (!baseDependencies.isEmpty()) {
+                        baseDependency.setChildren(dependencyInfosToBaseDependnecies(projectInfo.getDependencies()));
+                    }
+                    aggregatingProject.getBaseDependencies().add(baseDependency);*//*
                 }
             }
 
@@ -539,7 +546,7 @@ public abstract class AgentMojo extends WhitesourceMojo {
                 aggregatingProject.getCoordinates().setArtifactId(aggregateProjectName);
             }
             projectInfos.add(aggregatingProject);
-        }
+        }*/
         return projectInfos;
     }
 
@@ -609,5 +616,4 @@ public abstract class AgentMojo extends WhitesourceMojo {
     private String getFilename(AetherArtifact artifact) {
         return MessageFormat.format(FILENAME_PATTERN, artifact.getArtifactId(), artifact.getVersion(), artifact.getExtension());
     }
-
 }
