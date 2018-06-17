@@ -106,7 +106,8 @@ public class UpdateMojo extends AgentMojo {
             if (checkPolicies) {
                 info("Checking Policies");
                 CheckPolicyComplianceResult result = service.checkPolicyCompliance(
-                        orgToken, product, productVersion, projectInfos, forceCheckAllDependencies, userKey, requesterEmail, aggregateModules, preserveModuleInfo, aggregateProjectName, aggregateProjectToken);
+                        orgToken, product, productVersion, projectInfos, forceCheckAllDependencies, userKey, requesterEmail,
+                        aggregateModules, preserveModuleInfo, aggregateProjectName, aggregateProjectToken);
 
                 if (outputDirectory == null ||
                         (!outputDirectory.exists() && !outputDirectory.mkdirs())) {
@@ -122,7 +123,8 @@ public class UpdateMojo extends AgentMojo {
 
                 if (!hasRejections || forceUpdate) {
                     info(forceUpdate ? SENDING_FORCE_UPDATE : SENDING_UPDATE);
-                    updateResult = service.update(orgToken, requesterEmail, product, productVersion, projectInfos, userKey, aggregateModules, preserveModuleInfo, aggregateProjectName, aggregateProjectToken);
+                    updateResult = service.update(orgToken, requesterEmail, product, productVersion, projectInfos, userKey,
+                            aggregateModules, preserveModuleInfo, aggregateProjectName, aggregateProjectToken);
                     logResult(updateResult);
                 }
 
@@ -133,7 +135,8 @@ public class UpdateMojo extends AgentMojo {
                 }
             } else {
                 info(SENDING_UPDATE);
-                updateResult = service.update(orgToken, requesterEmail, product, productVersion, projectInfos, userKey);
+                updateResult = service.update(orgToken, requesterEmail, product, productVersion, projectInfos, userKey,
+                        aggregateModules, preserveModuleInfo, aggregateProjectName, aggregateProjectToken);
                 logResult(updateResult);
             }
         } catch (WssServiceException e) {
